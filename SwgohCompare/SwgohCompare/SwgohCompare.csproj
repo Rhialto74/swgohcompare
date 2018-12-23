@@ -14,7 +14,7 @@
 
 
   <ItemGroup>
-    <ProjectReference Include="..\..\..\SwgohHelpApi\SwgohHelpApi\SwgohHelpApi.csproj" />
+    <ProjectReference Include="..\..\..\swgoh-dotnet-api\SwgohHelpApi\SwgohHelpApi\SwgohHelpApi.csproj" />
   </ItemGroup>
 
 </Project>
