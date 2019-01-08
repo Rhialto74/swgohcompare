@@ -8,7 +8,7 @@ import { RosterModel } from '../model/RosterModel';
 })
 export class ComparisonTableComponent implements OnInit {
   @Input('roster') rosterDisplay: RosterModel.Roster;
-  columnsToDisplay = ['nameKey', 'rarity', 'level', 'gear', 'skills'];
+  columnsToDisplay = ['nameKey', 'rarity', 'level', 'gear', 'skills', 'equipped'];
   constructor() { }
   
   ngOnInit() {

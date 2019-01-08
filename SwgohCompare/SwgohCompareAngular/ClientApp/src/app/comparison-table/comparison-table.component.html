@@ -18,12 +18,26 @@
   <ng-container matColumnDef="skills">
     <th mat-header-cell *matHeaderCellDef> Skills </th>
     <td mat-cell *matCellDef="let element">
-      <div *ngFor="let skill of element.skills; odd as isOdd" [ngClass]="{'highlight-row' : isOdd}">
+      <div *ngFor="let skill of element.skills">
         {{skill.nameKey}} -- {{skill.tier}}
       </div>
-      
+
+    </td>
+  </ng-container>
+  <ng-container matColumnDef="equipped">
+    <th mat-header-cell *matHeaderCellDef> Equipped Gear </th>
+    <td mat-cell *matCellDef="let element">
+      <ng-container *ngIf="element.equipped?.length > 0">
+        <div *ngFor="let equip of element.equipped;">
+          Gear: {{equip.nameKey}} <br />
+          Position: {{equip.slot}}
+        </div>
+      </ng-container>
+      <ng-container *ngIf="element.equipped?.length == 0">
+        No gear equipped at this level
+        </ng-container>
     </td>
   </ng-container>
   <tr mat-header-row *matHeaderRowDef="columnsToDisplay"></tr>
-  <tr mat-row *matRowDef="let myRowData; columns: columnsToDisplay"></tr>
+  <tr mat-row *matRowDef="let myRowData; columns: columnsToDisplay;  odd as isOdd" [ngClass]="{'highlight-row' : isOdd}"></tr>
 </table>
