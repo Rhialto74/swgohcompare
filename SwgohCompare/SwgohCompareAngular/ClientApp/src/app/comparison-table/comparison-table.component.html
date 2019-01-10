@@ -1,4 +1,4 @@
-<table mat-table [dataSource]="rosterDisplay" class="mat-elevation-z8 mat-table" *ngIf="rosterDisplay" style="width:100%">
+<table mat-table [dataSource]="rosterInput" class="mat-elevation-z8 mat-table" *ngIf="rosterInput" style="width:100%">
   <ng-container matColumnDef="rarity">
     <th mat-header-cell *matHeaderCellDef> Rarity </th>
     <td mat-cell *matCellDef="let element"> {{element.rarity}} </td>
@@ -18,24 +18,21 @@
   <ng-container matColumnDef="skills">
     <th mat-header-cell *matHeaderCellDef> Skills </th>
     <td mat-cell *matCellDef="let element">
-      <div *ngFor="let skill of element.skills">
+      <div *ngFor="let skill of sortSkills('nameKey', element.skills)">
         {{skill.nameKey}} -- {{skill.tier}}
       </div>
 
     </td>
   </ng-container>
-  <ng-container matColumnDef="equipped">
+  <ng-container matColumnDef="character">
     <th mat-header-cell *matHeaderCellDef> Equipped Gear </th>
     <td mat-cell *matCellDef="let element">
-      <ng-container *ngIf="element.equipped?.length > 0">
-        <div *ngFor="let equip of element.equipped;">
-          Gear: {{equip.nameKey}} <br />
-          Position: {{equip.slot}}
+      <div *ngFor="let equip of element.character.gearSlots">
+        <div style="border:1px solid white;">
+          <img src="{{equip.imageUrl}}" alt="{{equip.name}}" width="56" height="56" />
         </div>
-      </ng-container>
-      <ng-container *ngIf="element.equipped?.length == 0">
-        No gear equipped at this level
-        </ng-container>
+      </div>
+  
     </td>
   </ng-container>
   <tr mat-header-row *matHeaderRowDef="columnsToDisplay"></tr>

@@ -5,6 +5,8 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Caching.Memory;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
 using SwgohHelpApi;
 using SwgohHelpApi.Model;
 
@@ -14,16 +16,18 @@ namespace SwgohCompareAngular.Controllers
     [ApiController]
     public class UnitController : ControllerBase
     {
-        private const string testUsername = "Rhialto";
-        private const string testPassword = "gm1oB4GCigeqyr0kB8G6APqjHk2DvoXXI4rfxXgo";
+        private string _testUsername;
+        private string _testPassword;
         private IMemoryCache _cache;
         private static string LocalUnitEntry = "_LocalizedUnits";
         private static string PlayerEntry = "_Player";
         private static string HelperEntry = "_Helper";
 
-        public UnitController(IMemoryCache memoryCache)
+        public UnitController(IMemoryCache memoryCache, IConfiguration configuration)
         {
             _cache = memoryCache;
+            _testUsername = configuration["SwgohHelpAuth:username"];
+            _testPassword = configuration["SwgohHelpAuth:password"];
         }
         [HttpGet("[action]")]
         public List<LocalizedUnit> UnitList()
@@ -180,7 +184,7 @@ namespace SwgohCompareAngular.Controllers
 
             if (!_cache.TryGetValue(HelperEntry, out helper))
             {
-                helper = new SwgohHelper(new UserSettings() { Username = testUsername, Password = testPassword, Debug = "true" });
+                helper = new SwgohHelper(new UserSettings() { Username = _testUsername, Password = _testPassword, Debug = "true" });
                 helper.Login();
                 SetCacheValue(HelperEntry, helper);
             }

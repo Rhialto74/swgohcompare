@@ -13,6 +13,7 @@ export interface Roster {
   mods: Mods[];
   crew: Crew[];
   gp: number;
+  character: CharacterGear;
 }
 
 export interface Crew {
@@ -66,5 +67,15 @@ export interface Crew {
   export interface LocalizedUnit {
   nameKey: string;
   baseId: string;
+  }
+  export class CharacterGear {
+    id: number;
+    gearSlots: GearDetails[];
+    constructor() {
+      this.gearSlots = [];
+    }
+  }
+  export class GearDetails {
+    constructor(public name: string, public imageUrl: string) { };
   }
 }
