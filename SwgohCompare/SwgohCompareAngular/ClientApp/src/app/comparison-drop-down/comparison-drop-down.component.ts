@@ -5,6 +5,7 @@ import { Observable } from 'rxjs';
 import { map, startWith } from 'rxjs/operators';
 import { RosterModel } from '../model/RosterModel';
 import { GearModel } from '../model/GearModel';
+import { forEach } from '@angular/router/src/utils/collection';
 
 
 @Component({
@@ -21,16 +22,17 @@ export class ComparisonDropDownComponent implements OnInit {
   charDropDown = new FormControl();
   public units: RosterModel.LocalizedUnit[];
   public roster: RosterModel.Roster[];
+  public unitData: RosterModel.UnitData[];
+  public tiers: RosterModel.UnitTierList[];
   filteredUnits: Observable<RosterModel.LocalizedUnit[]>;
   http: HttpClient;
   baseUrl: string;
   allgear: GearModel.Gear[];
-
   gearitem: GearModel.Gear;
-
-  charCompareOne: RosterModel.CharacterGear;
-  charCompareTwo: RosterModel.CharacterGear;
-  
+  charCompare: RosterModel.CharacterGear[] = [];
+  playerNames: string[];
+  showProgress: boolean;
+    
 
   //Body
   constructor(private httpClient: HttpClient, @Inject('BASE_URL') private baseU: string) {
@@ -44,20 +46,27 @@ export class ComparisonDropDownComponent implements OnInit {
     }, error => console.error(error));
   }
   ngOnInit() {
-    this.charCompareOne = new RosterModel.CharacterGear();
-    this.charCompareTwo = new RosterModel.CharacterGear();
+    this.charCompare[0] = new RosterModel.CharacterGear();
+    this.charCompare[1] = new RosterModel.CharacterGear();
+    this.showProgress = false;
   }
+  //Displays the name of the unit selected in the dropdown box
   displayFn(unit?: RosterModel.LocalizedUnit): string | undefined {
     return unit ? unit.nameKey : undefined;
   }
+
+  //Filters the dropdown list
   private _filter(value: string): RosterModel.LocalizedUnit[] {
     const filterValue = typeof value !== 'undefined' ? value.toLowerCase() : "";
     return this.units.filter(unit => unit.baseId.toLowerCase().includes(filterValue));
   }
 
+  //Populates the dropdown list
   private getDropDownList() {
+    this.showProgress = true;
     let allyCodes: number[] = [this.allyCodeOne.value, this.allyCodeTwo.value];
     this.http.post<RosterModel.LocalizedUnit[]>(this.baseUrl + 'api/Unit/UnitListForPlayers', allyCodes).subscribe(result => {
+      this.showProgress = false;
       this.units = result;
 
       this.filteredUnits = this.compControl.valueChanges
@@ -70,62 +79,56 @@ export class ComparisonDropDownComponent implements OnInit {
     }, error => console.error(error));
   }
 
+  //Populates the Comparison Table Data
   private getDataTables() {
     let comparisonInfo: string[] = [this.allyCodeOne.value, this.allyCodeTwo.value, this.compControl.value.baseId];
     
-    this.http.post<RosterModel.Roster[]>(this.baseUrl + 'api/Unit/GetUnitInformationForPlayers', comparisonInfo).subscribe(result => {
-      this.roster = result;
+    this.http.post<RosterModel.PlayerInformation>(this.baseUrl + 'api/Unit/GetUnitInformationForPlayers', comparisonInfo).subscribe(result => {
+      this.roster = result.rosterList;
+      this.unitData = result.unitStatList;
+      this.roster[0].playerName = result.playerNames[0];
+      this.roster[1].playerName = result.playerNames[1];
+      this.tiers = result.unitInfo;
       this.populateGear();
     }, error => console.error(error));
   }
 
+  //Determines which gear should be highlighted as equipped.
   private populateGear() {
     var count = 0;
     
     for (let rosteritem of this.roster) {
-      if (count == 0) {
-        for (let i = 0; i < 6; i++) {
-          if (rosteritem.equipped[i]) {
-            if (rosteritem.equipped[i].slot == i.toString()) {
-              this.charCompareOne.gearSlots[i] = new RosterModel.GearDetails(rosteritem.equipped[i].nameKey, this.getImageUrl(rosteritem.equipped[i].equipmentId));
-            }
-            else {
-              this.charCompareOne.gearSlots[i-1] = new RosterModel.GearDetails("Empty" + [i-1], "");
-              this.charCompareOne.gearSlots[i] = new RosterModel.GearDetails(rosteritem.equipped[i].nameKey, this.getImageUrl(rosteritem.equipped[i].equipmentId));
-            }
-          }
-          else {
-            this.charCompareOne.gearSlots[i] = new RosterModel.GearDetails("Empty" + [i], "");
-          }
-        }
-        this.roster[count].character = this.charCompareOne;
-        count++;
+      var gearLayout = this.tiers.find(function (element) {
+        return element.tier == rosteritem.gear;
+      });
+      for (let item of rosteritem.equipped) {
+        this.charCompare[count].gearSlots[Number(item.slot)] = new RosterModel.GearDetails(item.nameKey, this.getImageUrl(item.equipmentId), Number(item.slot), true);
       }
-      else {
-        for (let i = 0; i < 6; i++) {
-          if (rosteritem.equipped[i]) {
-            if (rosteritem.equipped[i].slot == i.toString()) {
-              this.charCompareTwo.gearSlots[i] = new RosterModel.GearDetails(rosteritem.equipped[i].nameKey, this.getImageUrl(rosteritem.equipped[i].equipmentId));
-            }
-            else {
-              this.charCompareTwo.gearSlots[i-1] = new RosterModel.GearDetails("Empty" + [i-1], "");
-              this.charCompareOne.gearSlots[i] = new RosterModel.GearDetails(rosteritem.equipped[i].nameKey, this.getImageUrl(rosteritem.equipped[i].equipmentId));
-            }
-          }
-          else {
-            this.charCompareTwo.gearSlots[i] = new RosterModel.GearDetails("Empty" + [i], "");
-          }
+      for (let i = 0; i < 6; i++) {
+        if (!this.charCompare[count].gearSlots[i]) {
+          this.charCompare[count].gearSlots[i] = new RosterModel.GearDetails(this.getImageName(gearLayout.equipmentSetList[i]), this.getImageUrl(gearLayout.equipmentSetList[i]), i, false);
         }
-        this.roster[count].character = this.charCompareTwo;
       }
+      this.roster[count].character = this.charCompare[count];
+      count++;
     }
   }
+
+  //Composes the image urls for the gear pieces
   getImageUrl(gearid: string) {
     this.gearitem = this.allgear.find(function (item) {
       return item.base_id == gearid;
     });
     var lastSlash = this.gearitem.image.lastIndexOf('/') + 1;
     return "assets/images/" + this.gearitem.image.substring(lastSlash);
+  }
+
+  //Extracts the image name from the list
+  getImageName(gearid: string) {
+    this.gearitem = this.allgear.find(function (item) {
+      return item.base_id == gearid;
+    });
+    return this.gearitem.name;
   }
   
 }

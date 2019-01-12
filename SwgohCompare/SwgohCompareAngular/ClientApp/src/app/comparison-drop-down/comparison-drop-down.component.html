@@ -10,18 +10,18 @@
 </p>
 
 <button mat-raised-button name="buttonPopulate" (click)="getDropDownList()">Click Here</button>
+<mat-spinner *ngIf="showProgress"></mat-spinner>
+  <p>
+    <mat-form-field *ngIf="units">
+      <input type="text" placeholder="-- Select A Character --" matInput [formControl]="compControl" [matAutocomplete]="auto">
+      <mat-autocomplete #auto="matAutocomplete" [displayWith]="displayFn" (optionSelected)="getDataTables()">
+        <mat-option *ngFor="let unit of filteredUnits | async" [value]="unit">
+          {{ unit.nameKey }}
+        </mat-option>
+      </mat-autocomplete>
+    </mat-form-field>
+  </p>
 
-<p>
-  <mat-form-field *ngIf="units">
-    <input type="text" placeholder="-- Select A Character --" matInput [formControl]="compControl" [matAutocomplete]="auto">
-    <mat-autocomplete #auto="matAutocomplete" [displayWith]="displayFn" (optionSelected)="getDataTables()">
-      <mat-option *ngFor="let unit of filteredUnits | async" [value]="unit">
-        {{ unit.nameKey }}
-      </mat-option>
-    </mat-autocomplete>
-  </mat-form-field>
-</p>
-
-<app-comparison-table [roster]="roster"></app-comparison-table>
+  <app-comparison-table [roster]="roster"></app-comparison-table>
 
 

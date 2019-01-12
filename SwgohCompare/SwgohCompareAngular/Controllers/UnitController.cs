@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Dynamic;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
@@ -9,6 +10,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using SwgohHelpApi;
 using SwgohHelpApi.Model;
+using SwgohHelpApi.Model.Crinolo;
 
 namespace SwgohCompareAngular.Controllers
 {
@@ -22,6 +24,10 @@ namespace SwgohCompareAngular.Controllers
         private static string LocalUnitEntry = "_LocalizedUnits";
         private static string PlayerEntry = "_Player";
         private static string HelperEntry = "_Helper";
+
+        private const string sourceHelp = "SWGOHHELP";
+        private const string sourceCrinolo = "CRINOLO";
+        private const string sourceGg = "GG";
 
         public UnitController(IMemoryCache memoryCache, IConfiguration configuration)
         {
@@ -57,38 +63,36 @@ namespace SwgohCompareAngular.Controllers
             }
             return localizedUnits;
         }
-
-        private List<Player> GetPlayerOneAndTwo(List<int> codesToRequest)
+        private List<Player> GetPlayerOneAndTwoFromHelp(List<string> codesToRequest)
         {
             Player PlayerOne;
             Player PlayerTwo;
             List<Player> players;
-            int PlayerOneCode = codesToRequest[0];
-            int PlayerTwoCode = codesToRequest[1];
 
-            var dictPlayerEntries = GetPlayerEntries(codesToRequest);
+            string PlayerOneCode = codesToRequest[0];
+            string PlayerTwoCode = codesToRequest[1];
 
             //Check if PlayerOne is in the cache
-            if (_cache.TryGetValue(dictPlayerEntries[PlayerOneCode], out PlayerOne))
+            if (GetCacheValue(PlayerOneCode, sourceHelp, out PlayerOne))
             {
                 codesToRequest.Remove(PlayerOneCode);
             }
 
             //Check if PlayerTwo is in the cache
-            if (_cache.TryGetValue(dictPlayerEntries[PlayerTwoCode], out PlayerTwo))
+            if (GetCacheValue(PlayerTwoCode, sourceHelp, out PlayerTwo))
             {
                 codesToRequest.Remove(PlayerTwoCode);
             }
 
-            if (codesToRequest.Count > 0)
+            var options = new RequestOptions
             {
-                var options = new RequestOptions
-                {
-                    allycodes = codesToRequest,
-                    language = "eng_us",
-                    enums = true
-                };
-                
+                allycodes = new List<int>() { int.Parse(PlayerOneCode), int.Parse(PlayerTwoCode) },
+                language = "eng_us",
+                enums = true
+            };
+
+            if (codesToRequest.Count > 0)
+            { 
                 var helper = Authenticate();
                 players = helper.fetchPlayers(options);
 
@@ -96,17 +100,55 @@ namespace SwgohCompareAngular.Controllers
                 {
                     if (PlayerOne == null)
                     {
-                        PlayerOne = players.Where(x => x.AllyCode == code).First();
+                        PlayerOne = players.Where(x => x.AllyCode.ToString() == code).First();
                     }
                     else if (PlayerTwo == null)
                     {
-                        PlayerTwo = players.Where(x => x.AllyCode == code).First();
+                        PlayerTwo = players.Where(x => x.AllyCode.ToString() == code).First();
                     }
 
-                    SetCacheValue(dictPlayerEntries[code], players.Where(x => x.AllyCode == code).First());
+                    SetCacheValue(code, sourceHelp, players.Where(x => x.AllyCode.ToString() == code).First());
                 }
             }
             return new List<Player>() { PlayerOne, PlayerTwo };
+        }
+        private List<UnitDict> GetPlayerOneAndTwo(List<string> codesToRequest)
+        {
+            UnitDict PlayerOne;
+            UnitDict PlayerTwo;
+            
+            string PlayerOneCode = codesToRequest[0];
+            string PlayerTwoCode = codesToRequest[1];
+
+            //Check if PlayerOne is in the cache
+            if (GetCacheValue(PlayerOneCode, sourceCrinolo, out PlayerOne))
+            {
+                codesToRequest.Remove(PlayerOneCode);
+            }
+
+            //Check if PlayerTwo is in the cache
+            if (GetCacheValue(PlayerTwoCode, sourceCrinolo, out PlayerTwo))
+            {
+                codesToRequest.Remove(PlayerTwoCode);
+            }
+
+            if (codesToRequest.Count > 0)
+            {
+                foreach (var code in codesToRequest)
+                {
+                    if (PlayerOne == null)
+                    {
+                        PlayerOne = SwgohHelper.fetchDictOfUnitsForPlayerFromCrinolo(code.ToString());
+                        SetCacheValue(code, sourceCrinolo, PlayerOne);
+                    }
+                    else if (PlayerTwo == null)
+                    {
+                        PlayerTwo = SwgohHelper.fetchDictOfUnitsForPlayerFromCrinolo(code.ToString());
+                        SetCacheValue(code, sourceCrinolo, PlayerTwo);
+                    }
+                }
+            }
+            return new List<UnitDict>() { PlayerOne, PlayerTwo };
         }
 
         /// <summary>
@@ -115,49 +157,65 @@ namespace SwgohCompareAngular.Controllers
         /// <param name="codes"></param>
         /// <returns></returns>
         [HttpPost("[action]")]
-        public List<LocalizedUnit> UnitListForPlayers(IEnumerable<int> codes)
+        public List<LocalizedUnit> UnitListForPlayers(IEnumerable<string> codes)
         {
             List<LocalizedUnit> localizedUnits;
-            Player PlayerOne;
-            Player PlayerTwo;
+            UnitDict PlayerOne;
+            UnitDict PlayerTwo;
             
             var helper = Authenticate();
 
             localizedUnits = GetLocalizedUnits();
 
-            var codesToRequest = new List<int>(codes);
+            var codesToRequest = new List<string>(codes);
 
-            List<Player> playerOneandTwo = GetPlayerOneAndTwo(codesToRequest);
+            List<UnitDict> playerOneandTwo = GetPlayerOneAndTwo(codesToRequest);
 
             PlayerOne = playerOneandTwo[0];
             PlayerTwo = playerOneandTwo[1];
 
-            var filteredPlayerUnits = PlayerOne.Roster.Where(x => PlayerTwo.Roster.Any(y => y.DefId == x.DefId));
+            var filteredPlayerUnits = PlayerOne.Where(x => PlayerTwo.Any(y => y.Key == x.Key));
 
-            var filteredUnits = localizedUnits.Where(x => filteredPlayerUnits.Any(y => y.DefId == x.BaseId));
+            var filteredUnits = localizedUnits.Where(x => filteredPlayerUnits.Any(y => y.Key == x.BaseId));
             
             return filteredUnits.ToList();
         }
 
         [HttpPost("[action]")]
-        public List<Roster> GetUnitInformationForPlayers(List<string> comparisonInfo)
+        public PlayerInformation GetUnitInformationForPlayers(List<string> comparisonInfo)
         {
-            Player PlayerOne;
-            Player PlayerTwo;
-            string unitDefId = comparisonInfo[2];
-            var helper = Authenticate();
-            var codesToRequest = new List<int>() { int.Parse(comparisonInfo[0]), int.Parse(comparisonInfo[1]) };
+            UnitDict PlayerOne;
+            UnitDict PlayerTwo;
 
-            List<Player> playerOneandTwo = GetPlayerOneAndTwo(codesToRequest);
+            Player PlayerOneHelp;
+            Player PlayerTwoHelp;
+
+            var helper = Authenticate();
+
+            string unitDefId = comparisonInfo[2];
+            //var helper = Authenticate();
+            var codesToRequest = new List<string>() { comparisonInfo[0], comparisonInfo[1] };
+            var codesToRequest2 = new List<string>() { comparisonInfo[0], comparisonInfo[1] };
+            List<UnitDict> playerOneandTwo = GetPlayerOneAndTwo(codesToRequest);
+            List<Player> playerOneandTwoHelp = GetPlayerOneAndTwoFromHelp(codesToRequest2);
+
             PlayerOne = playerOneandTwo[0];
             PlayerTwo = playerOneandTwo[1];
 
+            PlayerOneHelp = playerOneandTwoHelp[0];
+            PlayerTwoHelp = playerOneandTwoHelp[1];
+
+            List<UnitData> unitDataToReturn = new List<UnitData>();
             List<Roster> rosterToReturn = new List<Roster>();
 
-            rosterToReturn.Add(PlayerOne.Roster.Where(x => x.DefId == unitDefId).First());
-            rosterToReturn.Add(PlayerTwo.Roster.Where(x => x.DefId == unitDefId).First());
+            unitDataToReturn.Add(PlayerOne.Where(x => x.Key == unitDefId).First().Value);
+            unitDataToReturn.Add(PlayerTwo.Where(x => x.Key == unitDefId).First().Value);
 
-            return rosterToReturn;
+            rosterToReturn.Add(PlayerOneHelp.Roster.Where(x => x.DefId == unitDefId).First());
+            rosterToReturn.Add(PlayerTwoHelp.Roster.Where(x => x.DefId == unitDefId).First());
+
+            PlayerInformation pinfo = new PlayerInformation() { PlayerNames = new List<string>() { PlayerOneHelp.Name, PlayerTwoHelp.Name }, UnitStatList = unitDataToReturn, RosterList = rosterToReturn, UnitInfo = helper.FetchGearTiersForUnits(unitDefId)[0].unitTierList };
+            return pinfo;
         }
 
         // POST: api/Unit
@@ -186,32 +244,41 @@ namespace SwgohCompareAngular.Controllers
             {
                 helper = new SwgohHelper(new UserSettings() { Username = _testUsername, Password = _testPassword, Debug = "true" });
                 helper.Login();
-                SetCacheValue(HelperEntry, helper);
+                SetCacheValue(HelperEntry, sourceHelp, helper);
             }
 
             return helper;
         }
 
-        private void CheckForCachedPlayers()
+        private Dictionary<string, string> GetPlayerEntries(List<string> codes, string source)
         {
-
+            var playerEntryList = new Dictionary<string, string>();
+            playerEntryList.Add(string.Concat(codes[0], source), string.Concat(PlayerEntry, source, codes[0]));
+            playerEntryList.Add(string.Concat(codes[0], source), string.Concat(PlayerEntry, source, codes[1]));
+            return playerEntryList;
         }
-        private void SetCacheValue<T>(string key, T value)
+        private void SetCacheValue<T>(string key, string source, T value)
         {
             // Set cache options.
             var cacheEntryOptions = new MemoryCacheEntryOptions()
             // Keep in cache for this time, reset time if accessed.
             .SetSlidingExpiration(TimeSpan.FromMinutes(5));
 
-            _cache.Set(key, value);
+            _cache.Set(string.Concat(key, source), value);
         }
-
-        private Dictionary<int, string> GetPlayerEntries(List<int> codes)
+        private bool GetCacheValue<T>(string item, string source, out T cachedItem)
         {
-            var playerEntryList = new Dictionary<int, string>();
-            playerEntryList.Add(codes[0], string.Concat(PlayerEntry, codes[0]));
-            playerEntryList.Add(codes[1], string.Concat(PlayerEntry, codes[1]));
-            return playerEntryList;
+            string combinedKey = string.Concat(item, source);
+            if (_cache.TryGetValue(combinedKey, out T returnedItem))
+            {
+                cachedItem = returnedItem;
+                return true;
+            }
+            else
+            {
+                cachedItem = default(T);
+                return false;
+            }
         }
 
     }

@@ -13,6 +13,7 @@ import { CounterComponent } from './counter/counter.component';
 import { FetchDataComponent } from './fetch-data/fetch-data.component';
 import { ComparisonDropDownComponent } from './comparison-drop-down/comparison-drop-down.component';
 import { ComparisonTableComponent } from './comparison-table/comparison-table.component';
+import { ComparisonStatTableComponent } from './comparison-stat-table/comparison-stat-table.component';
 
 
 @NgModule({
@@ -23,7 +24,8 @@ import { ComparisonTableComponent } from './comparison-table/comparison-table.co
     CounterComponent,
     FetchDataComponent,
     ComparisonDropDownComponent,
-    ComparisonTableComponent
+    ComparisonTableComponent,
+    ComparisonStatTableComponent
   ],
   imports: [
     HttpClientModule,

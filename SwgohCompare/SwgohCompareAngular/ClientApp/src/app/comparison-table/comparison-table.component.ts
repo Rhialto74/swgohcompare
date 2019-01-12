@@ -11,7 +11,7 @@ export class ComparisonTableComponent implements OnInit {
   
   @Input('roster') rosterInput: RosterModel.Roster[];
     
-  columnsToDisplay = ['nameKey', 'rarity', 'level', 'gear', 'skills', 'character'];
+  columnsToDisplay = ['playerName','nameKey', 'rarity', 'level', 'gear', 'skills', 'character'];
 
   constructor() {
     

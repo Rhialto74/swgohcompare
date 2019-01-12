@@ -10,9 +10,11 @@ var RosterModel;
     }());
     RosterModel.CharacterGear = CharacterGear;
     var GearDetails = /** @class */ (function () {
-        function GearDetails(name, imageUrl) {
+        function GearDetails(name, imageUrl, position, equipped) {
             this.name = name;
             this.imageUrl = imageUrl;
+            this.position = position;
+            this.equipped = equipped;
         }
         ;
         return GearDetails;

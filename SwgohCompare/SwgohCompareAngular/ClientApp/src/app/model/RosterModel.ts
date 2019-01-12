@@ -1,20 +1,88 @@
 export module RosterModel {
-export interface Roster {
-  id: string;
-  defId: string;
-  nameKey: string;
-  rarity: number;
-  level: number;
-  xp: number;
-  gear: number;
-  equipped: Equipped[];
-  combatType: string;
-  skills: Skills[];
-  mods: Mods[];
-  crew: Crew[];
-  gp: number;
-  character: CharacterGear;
-}
+
+  //Begin Crinolo Model Stuff
+  export interface UnitData {
+    unit: UnitStat;
+    stats: Stats;
+  }
+
+  export interface UnitStat {
+    updated: number;
+    player: string;
+    allyCode: number;
+    type: number;
+    gp: number;
+    starLevel: number;
+    level: number;
+    gearLevel: number;
+    gear: string[];
+    zetas: object[];
+    mods: UnitMod[];
+  }
+  export interface Stats {
+    final: Final;
+    mods: Mods;
+  }
+
+  export interface UnitMod {
+    id: string;
+    set: number;
+    level: number;
+    pips: number;
+    tier: number;
+    stat: number[];
+  }
+
+  export interface StatsMods {
+    "Physical Damage": number;
+    "Special Damage": number;
+    "Armor": number;
+    "Resistance": number;
+    "Protection": number;
+    "None": number;
+    "Health": number;
+    "Physical Critical Chance": number;
+    "Special Critical Chance": number;
+  }
+
+  export interface Final {
+    Strength: number;
+    Agility: number;
+    Intelligence: number;
+    Speed: number;
+    Health: number;
+    "Physical Damage": number;
+    Potency: number;
+    Tenacity: number;
+    Armor: number;
+    Resistance: number;
+    "Physical Critical Chance": number;
+    Protection: number;
+    "Special Damage": number;
+    "Critical Damage": number;
+    "Special Critical Chance": number;
+    "Armor Penetration": number;
+    "None": 0
+  }
+  //End Crinolo Model Stuff
+
+  export interface Roster {
+    playerName:string;
+    id: string;
+    defId: string;
+    nameKey: string;
+    rarity: number;
+    level: number;
+    xp: number;
+    gear: number;
+    equipped: Equipped[];
+    combatType: string;
+    skills: Skills[];
+    mods: Mods[];
+    crew: Crew[];
+    gp: number;
+    character: CharacterGear;
+  }
 
 export interface Crew {
   unitId: string;
@@ -76,6 +144,18 @@ export interface Crew {
     }
   }
   export class GearDetails {
-    constructor(public name: string, public imageUrl: string) { };
+    constructor(public name: string, public imageUrl: string, public position: number, public equipped: boolean) { };
+  }
+
+  export interface PlayerInformation {
+    playerNames: string[];
+    unitStatList: UnitData[]
+    rosterList: Roster[];
+    unitInfo: UnitTierList[];
+  }
+
+  export interface UnitTierList {
+    tier: number;
+    equipmentSetList: string[];
   }
 }
