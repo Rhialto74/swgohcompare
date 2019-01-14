@@ -21,7 +21,7 @@ export module RosterModel {
   }
   export interface Stats {
     final: Final;
-    mods: Mods;
+    mods: StatsMods;
   }
 
   export interface UnitMod {
@@ -34,35 +34,50 @@ export module RosterModel {
   }
 
   export interface StatsMods {
+    Health: number;
+    Protection: number;
+    Speed: number;
+    "Critical Damage": number;
+    Potency: number;
+    Tenacity: number;
+    "Health Steal": number;
+    "Defense Penetration": number;
     "Physical Damage": number;
-    "Special Damage": number;
-    "Armor": number;
-    "Resistance": number;
-    "Protection": number;
-    "None": number;
-    "Health": number;
     "Physical Critical Chance": number;
+    "Armor Penetration": number;
+    Accuracy: number;
+    Armor: number;
+    "Dodge Chance": number;
+    "Critical Avoidance": number;
+    "Special Damage": number;
     "Special Critical Chance": number;
+    "Resistance Penetration": number;
+    Resistance: number;
   }
 
   export interface Final {
     Strength: number;
     Agility: number;
-    Intelligence: number;
-    Speed: number;
+    Tactics: number;
     Health: number;
-    "Physical Damage": number;
+    Protection: number;
+    Speed: number;
+    "Critical Damage": number;
     Potency: number;
     Tenacity: number;
-    Armor: number;
-    Resistance: number;
+    "Health Steal": number;
+    "Defense Penetration": number;
+    "Physical Damage": number;
     "Physical Critical Chance": number;
-    Protection: number;
-    "Special Damage": number;
-    "Critical Damage": number;
-    "Special Critical Chance": number;
     "Armor Penetration": number;
-    "None": 0
+    Accuracy: number;
+    Armor: number;
+    "Dodge Chance": number;
+    "Critical Avoidance": number;
+    "Special Damage": number;
+    "Special Critical Chance": number;
+    "Resistance Penetration": number;
+    Resistance: number;
   }
   //End Crinolo Model Stuff
 
@@ -157,5 +172,9 @@ export interface Crew {
   export interface UnitTierList {
     tier: number;
     equipmentSetList: string[];
+  }
+
+  export class MapObjectLookup {
+    constructor(public statName: string, public statValueP1: object, public statValueP2: object, public players: string[]) { };
   }
 }

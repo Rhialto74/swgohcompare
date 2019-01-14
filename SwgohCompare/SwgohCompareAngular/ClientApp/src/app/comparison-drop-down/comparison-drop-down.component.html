@@ -1,4 +1,63 @@
-<p>
+<mat-vertical-stepper [linear]="isLinear" [selectedIndex]="stepperIndex" #stepper>
+  <mat-step [stepControl]="firstFormGroup">
+    <form [formGroup]="firstFormGroup">
+      <ng-template matStepLabel>Enter the ally codes for comparison</ng-template>
+      <p>
+        <mat-form-field>
+          <input matInput placeholder="First Player Ally Code" [formControl]="allyCodeOne" required />
+        </mat-form-field>
+      </p>
+      <p>
+        <mat-form-field>
+          <input matInput placeholder="Second Player Ally Code" [formControl]="allyCodeTwo" required />
+        </mat-form-field>
+      </p>
+      <div>
+        <button mat-raised-button matStepperNext name="buttonPopulate" (click)="getDropDownList()">Next</button>
+      </div>
+    </form>
+  </mat-step>
+  <mat-step [stepControl]="secondFormGroup">
+    <form [formGroup]="secondFormGroup">
+      <ng-template matStepLabel>Select the unit to compare</ng-template>
+      <mat-spinner *ngIf="showProgress"></mat-spinner>
+      <mat-form-field *ngIf="units">
+        <input type="text" placeholder="-- Select A Character --" matInput [formControl]="compControl" [matAutocomplete]="auto" [(ngModel)]="value">
+        <mat-autocomplete #auto="matAutocomplete" [displayWith]="displayFn" (optionSelected)="getDataTables()">
+          <mat-option *ngFor="let unit of filteredUnits | async" [value]="unit">
+            {{ unit.nameKey }}
+          </mat-option>
+        </mat-autocomplete>
+        <button mat-button matSuffix mat-icon-button aria-label="Expand" (click)="value=''">
+          <mat-icon>expand_more</mat-icon>
+        </button>
+      </mat-form-field>
+      
+      <button mat-raised-button style="display:none;" matStepperNext name="butHiddenStepTwo" id="registerNextStep">Next</button>
+    </form>
+  </mat-step>
+  <mat-step>
+    <ng-template matStepLabel>Results</ng-template>
+    <mat-spinner *ngIf="showProgressStepThree"></mat-spinner>
+    <div *ngIf="!showProgressStepThree">
+      <h1 *ngIf="roster">{{roster[0].nameKey}}</h1>
+      <mat-divider></mat-divider>
+      <app-comparison-table [roster]="roster"></app-comparison-table>
+      <br />
+      <h1>Stats</h1>
+      <mat-divider></mat-divider>
+      <app-comparison-stat-table [unitdata]="unitData"></app-comparison-stat-table>
+      <div *ngIf="roster">
+        <button mat-button matStepperPrevious>Back</button>
+        <button mat-button (click)="stepper.reset()">Reset</button>
+      </div>
+    </div>
+  </mat-step>
+</mat-vertical-stepper>
+
+<!-- Old Below -->
+
+<!--<p>
   <mat-form-field>
     <input matInput placeholder="First Player Ally Code" [formControl]="allyCodeOne" />
   </mat-form-field>
@@ -9,7 +68,7 @@
   </mat-form-field>
 </p>
 
-<button mat-raised-button name="buttonPopulate" (click)="getDropDownList()">Click Here</button>
+<button mat-raised-button name="buttonPopulate" (click)="getDropDownList()">Get Units</button>
 <mat-spinner *ngIf="showProgress"></mat-spinner>
   <p>
     <mat-form-field *ngIf="units">
@@ -22,6 +81,7 @@
     </mat-form-field>
   </p>
 
-  <app-comparison-table [roster]="roster"></app-comparison-table>
+<app-comparison-table [roster]="roster"></app-comparison-table>
+<app-comparison-stat-table [unitdata]="unitData"></app-comparison-stat-table>-->
 
 

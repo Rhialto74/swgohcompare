@@ -1,6 +1,5 @@
 import { Component, OnInit, Input, Inject } from '@angular/core';
 import { RosterModel } from '../model/RosterModel';
-import { HttpClient } from '@angular/common/http';
 
 @Component({
   selector: 'app-comparison-table',
@@ -8,10 +7,10 @@ import { HttpClient } from '@angular/common/http';
   styleUrls: ['./comparison-table.component.css']
 })
 export class ComparisonTableComponent implements OnInit {
-  
+  playerNames: string[];
   @Input('roster') rosterInput: RosterModel.Roster[];
     
-  columnsToDisplay = ['playerName','nameKey', 'rarity', 'level', 'gear', 'skills', 'character'];
+  columnsToDisplay = ['playerName', 'rarity', 'level'];
 
   constructor() {
     
@@ -26,7 +25,11 @@ export class ComparisonTableComponent implements OnInit {
     //if (prop.charAt(0) === '-') { sorted.reverse(); }
     return sorted;
   }
-  
+  getPlayerNames(item: number) {
+    if (this.rosterInput) {
+      return this.rosterInput[0].players[item];
+    }
+  }
 }
 
 

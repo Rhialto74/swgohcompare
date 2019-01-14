@@ -4,3 +4,51 @@
 .highlight-row {
   background-color: #5e5c5c;
 }
+.statRow{
+  margin-bottom: 10px;
+}
+.statRow:after {
+  content: "";
+  display: table;
+  clear: both;
+}
+.statColumn {
+  float: left;
+  padding:5px;
+}
+.isGreater {
+  background-color: yellow;
+  color: black;
+  font-weight:bold;
+  padding:5px;
+}
+
+.topResultTable{
+  margin-bottom:10px;
+  margin-top:10px;
+  width:50%;
+}
+
+.topResultTable td  {
+  
+}
+
+.helper {
+  display: inline-block;
+  height: 100%;
+  vertical-align: middle;
+}
+
+.imgGear {
+  border: 2px solid gray;
+  background-color: black;
+  vertical-align: middle;
+  max-height: 56px;
+}
+
+.imgGearDisabled {
+  border: 2px solid #5e5c5c;
+  opacity: .3;
+  vertical-align: middle;
+  max-height: 56px;
+}
