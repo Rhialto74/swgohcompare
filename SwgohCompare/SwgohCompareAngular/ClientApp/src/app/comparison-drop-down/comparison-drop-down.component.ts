@@ -1,4 +1,4 @@
-import { Component, OnInit, Inject } from '@angular/core';
+import { Component, OnInit, Inject, isDevMode } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { FormControl, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Observable } from 'rxjs';
@@ -21,6 +21,7 @@ export class ComparisonDropDownComponent implements OnInit {
   allyCodeOne = new FormControl();
   allyCodeTwo = new FormControl();
   charDropDown = new FormControl();
+  
   public units: RosterModel.LocalizedUnit[];
   public roster: RosterModel.Roster[];
   public unitData: RosterModel.UnitData[];
@@ -49,8 +50,11 @@ export class ComparisonDropDownComponent implements OnInit {
   constructor(private httpClient: HttpClient, @Inject('BASE_URL') private baseU: string, private _formBuilder: FormBuilder) {
     this.http = httpClient;
     this.baseUrl = baseU;
-    this.allyCodeOne.setValue(362676873);
-    this.allyCodeTwo.setValue(999531726);
+
+    if (isDevMode()) {
+      this.allyCodeOne.setValue(362676873);
+      this.allyCodeTwo.setValue(999531726);
+    }
     this.players = [];
         
 
@@ -82,7 +86,7 @@ export class ComparisonDropDownComponent implements OnInit {
   }
 
   //Populates the dropdown list
-  private getDropDownList() {
+  public getDropDownList() {
     this.showProgress = true;
     let allyCodes: number[] = [this.allyCodeOne.value, this.allyCodeTwo.value];
     this.units = null;
@@ -101,7 +105,7 @@ export class ComparisonDropDownComponent implements OnInit {
   }
 
   //Populates the Comparison Table Data
-  private getDataTables() {
+  public getDataTables() {
     document.getElementById('registerNextStep').click();
     let comparisonInfo: string[] = [this.allyCodeOne.value, this.allyCodeTwo.value, this.compControl.value.baseId];
     this.showProgressStepThree = true;
@@ -141,7 +145,7 @@ export class ComparisonDropDownComponent implements OnInit {
   //}
 
   //Determines which gear should be highlighted as equipped.
-  private populateGear() {
+  public populateGear() {
     var count = 0;
     this.charCompare[0] = new RosterModel.CharacterGear();
     this.charCompare[1] = new RosterModel.CharacterGear();
@@ -164,7 +168,7 @@ export class ComparisonDropDownComponent implements OnInit {
   }
 
   //Composes the image urls for the gear pieces
-  getImageUrl(gearid: string) {
+  public getImageUrl(gearid: string) {
     this.gearitem = this.allgear.find(function (item) {
       return item.base_id == gearid;
     });
@@ -173,13 +177,16 @@ export class ComparisonDropDownComponent implements OnInit {
   }
 
   //Extracts the image name from the list
-  getImageName(gearid: string) {
+  public getImageName(gearid: string) {
     this.gearitem = this.allgear.find(function (item) {
       return item.base_id == gearid;
     });
     return this.gearitem.name;
   }
-  
+
+  public setCompControlValue() {
+    this.compControl.setValue('');
+  }
 }
 
 

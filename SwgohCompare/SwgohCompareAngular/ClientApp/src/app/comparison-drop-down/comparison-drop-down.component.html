@@ -1,7 +1,7 @@
-<mat-vertical-stepper [linear]="isLinear" [selectedIndex]="stepperIndex" #stepper>
+<mat-vertical-stepper [linear]="false" [selectedIndex]="stepperIndex" #stepper>
   <mat-step [stepControl]="firstFormGroup">
     <form [formGroup]="firstFormGroup">
-      <ng-template matStepLabel>Enter the ally codes for comparison</ng-template>
+      <ng-template matStepLabel>Enter the ally codes for comparison - no dashes or spaces. <b>Note:</b> Initial load of each section is slow.</ng-template>
       <p>
         <mat-form-field>
           <input matInput placeholder="First Player Ally Code" [formControl]="allyCodeOne" required />
@@ -22,13 +22,13 @@
       <ng-template matStepLabel>Select the unit to compare</ng-template>
       <mat-spinner *ngIf="showProgress"></mat-spinner>
       <mat-form-field *ngIf="units">
-        <input type="text" placeholder="-- Select A Character --" matInput [formControl]="compControl" [matAutocomplete]="auto" [(ngModel)]="value">
+        <input type="text" placeholder="-- Select A Character --" matInput [formControl]="compControl" [matAutocomplete]="auto">
         <mat-autocomplete #auto="matAutocomplete" [displayWith]="displayFn" (optionSelected)="getDataTables()">
           <mat-option *ngFor="let unit of filteredUnits | async" [value]="unit">
             {{ unit.nameKey }}
           </mat-option>
         </mat-autocomplete>
-        <button mat-button matSuffix mat-icon-button aria-label="Expand" (click)="value=''">
+        <button mat-button matSuffix mat-icon-button aria-label="Expand" (click)="setCompControlValue()">
           <mat-icon>expand_more</mat-icon>
         </button>
       </mat-form-field>

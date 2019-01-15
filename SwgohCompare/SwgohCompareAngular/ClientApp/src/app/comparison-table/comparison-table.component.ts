@@ -27,7 +27,7 @@ export class ComparisonTableComponent implements OnInit {
   }
   getPlayerNames(item: number) {
     if (this.rosterInput) {
-      return this.rosterInput[0].players[item];
+      return this.rosterInput[0].playerName;
     }
   }
 }
