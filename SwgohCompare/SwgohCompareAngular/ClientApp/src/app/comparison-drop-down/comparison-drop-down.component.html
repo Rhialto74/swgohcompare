@@ -19,7 +19,7 @@
   </mat-step>
   <mat-step [stepControl]="secondFormGroup">
     <form [formGroup]="secondFormGroup">
-      <ng-template matStepLabel>Select the unit to compare</ng-template>
+      <ng-template matStepLabel>Select the unit to compare - <b>Note:</b> Only units that are present in both accounts will show up here.</ng-template>
       <mat-spinner *ngIf="showProgress"></mat-spinner>
       <mat-form-field *ngIf="units">
         <input type="text" placeholder="-- Select A Character --" matInput [formControl]="compControl" [matAutocomplete]="auto">
