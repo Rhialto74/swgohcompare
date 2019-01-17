@@ -29,6 +29,7 @@
 
   <ItemGroup>
     <None Remove="ClientApp\src\app\material.module.ts" />
+    <None Remove="ClientApp\src\app\model\AbilityModel.ts" />
     <None Remove="ClientApp\src\app\model\CharacterComparer.js" />
     <None Remove="ClientApp\src\app\model\CharacterComparer.js.map" />
     <None Remove="ClientApp\src\app\model\CharacterComparer.ts" />
@@ -42,6 +43,7 @@
 
   <ItemGroup>
     <TypeScriptCompile Include="ClientApp\src\app\material.module.ts" />
+    <TypeScriptCompile Include="ClientApp\src\app\model\AbilityModel.ts" />
     <TypeScriptCompile Include="ClientApp\src\app\model\GearModel.ts" />
     <TypeScriptCompile Include="ClientApp\src\app\model\RosterModel.ts" />
   </ItemGroup>

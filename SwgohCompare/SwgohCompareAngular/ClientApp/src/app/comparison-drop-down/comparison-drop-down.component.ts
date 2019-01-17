@@ -7,6 +7,7 @@ import { RosterModel } from '../model/RosterModel';
 import { GearModel } from '../model/GearModel';
 import { forEach } from '@angular/router/src/utils/collection';
 import { MatStepperModule, MatStepper } from '@angular/material/stepper';
+import { UnitService } from '../providers/unit.service';
 
 
 @Component({
@@ -30,12 +31,15 @@ export class ComparisonDropDownComponent implements OnInit {
   http: HttpClient;
   baseUrl: string;
   allgear: GearModel.Gear[];
+  
   gearitem: GearModel.Gear;
   charCompare: RosterModel.CharacterGear[] = [];
   playerNames: string[];
   showProgress: boolean;
   showProgressStepThree: boolean;
   objectKeys = Object.keys;
+
+  unitSvc: UnitService;
 
   //Stepper
   firstFormGroup: FormGroup;
@@ -46,21 +50,22 @@ export class ComparisonDropDownComponent implements OnInit {
   players: string[];
   
 
-  //Body
-  constructor(private httpClient: HttpClient, @Inject('BASE_URL') private baseU: string, private _formBuilder: FormBuilder) {
+  //Main body
+  constructor(private httpClient: HttpClient, @Inject('BASE_URL') private baseU: string, private _formBuilder: FormBuilder, unitService: UnitService) {
     this.http = httpClient;
     this.baseUrl = baseU;
+    this.unitSvc = unitService;
 
-    if (isDevMode()) {
-      this.allyCodeOne.setValue(362676873);
-      this.allyCodeTwo.setValue(999531726);
-    }
+    //if (isDevMode()) {
+    //  this.allyCodeOne.setValue(362676873);
+    //  this.allyCodeTwo.setValue(999531726);
+    //}
     this.players = [];
         
 
-    this.http.get<GearModel.Gear[]>(this.baseUrl + 'api/Gear/GetAllGear').subscribe(result => {
+    this.unitSvc.GetAllGear().subscribe(result => {
       this.allgear = result;
-    }, error => console.error(error));
+    });
   }
   ngOnInit() {
     this.stepperIndex = 0;
@@ -90,7 +95,7 @@ export class ComparisonDropDownComponent implements OnInit {
     this.showProgress = true;
     let allyCodes: number[] = [this.allyCodeOne.value, this.allyCodeTwo.value];
     this.units = null;
-    this.http.post<RosterModel.LocalizedUnit[]>(this.baseUrl + 'api/Unit/UnitListForPlayers', allyCodes).subscribe(result => {
+    this.unitSvc.GetUnitsForDropDownList(allyCodes).subscribe(result => {
       this.showProgress = false;
       this.units = result;
 
@@ -101,49 +106,33 @@ export class ComparisonDropDownComponent implements OnInit {
           map(nameKey => nameKey ? this._filter(nameKey) : this.units.slice())
         );
 
-    }, error => console.error(error));
+    });
   }
 
   //Populates the Comparison Table Data
   public getDataTables() {
+
+    //Move us to the next step
     document.getElementById('registerNextStep').click();
+
+    //The comparison info is the two player ally codes and the baseId of the unit selected
     let comparisonInfo: string[] = [this.allyCodeOne.value, this.allyCodeTwo.value, this.compControl.value.baseId];
+
+    //Display the progress animation for this step
     this.showProgressStepThree = true;
-    this.http.post<RosterModel.PlayerInformation>(this.baseUrl + 'api/Unit/GetUnitInformationForPlayers', comparisonInfo).subscribe(result => {
+
+    //Call the service for the data and populate the fields
+    this.unitSvc.GetComparisonTableData(comparisonInfo).subscribe(result => {
       this.roster = result.rosterList;
       this.unitData = result.unitStatList;
       this.roster[0].playerName = result.playerNames[0];
       this.roster[1].playerName = result.playerNames[1];
       this.tiers = result.unitInfo;
       this.populateGear();
-      //this.getMainLookupsForComparison();
       this.showProgressStepThree = false;
-    }, error => console.error(error));
+    });
   }
-
-
-  //public getMainLookupsForComparison() {
-  //  this.objectMapper = [];
-  //  for (let item of this.roster) {
-  //    for (let key of this.objectKeys(item)) {
-  //      var found = this.objectMapper.find(function (element) {
-  //        return element.statName == key;
-  //      });
-  //      if (found) {
-  //        found.statValueP2 = item[key];
-  //        if (!found.players[1])
-  //          found.players[1] = item.playerName;
-  //      }
-  //      else {
-  //        if (!this.players[0])
-  //          this.players[0] = item.playerName;
-
-  //        this.objectMapper.push(new RosterModel.MapObjectLookup(key, item[key], null, this.players));
-  //      }
-  //    }
-  //  }
-  //}
-
+  
   //Determines which gear should be highlighted as equipped.
   public populateGear() {
     var count = 0;

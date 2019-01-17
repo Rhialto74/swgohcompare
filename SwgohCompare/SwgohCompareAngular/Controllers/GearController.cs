@@ -25,5 +25,11 @@ namespace SwgohCompareAngular.Controllers
         {
             return JsonConvert.DeserializeObject<List<Gear>>(SwgohHelper.fetchAllGearFromSwgohGGApi());
         }
+
+        [HttpGet("[action]")]
+        public List<Ability> GetAllAbilities()
+        {
+            return JsonConvert.DeserializeObject<List<Ability>>(SwgohHelper.fetchAllAbilitiesFromSwgohGGApi());
+        }
     }
 }

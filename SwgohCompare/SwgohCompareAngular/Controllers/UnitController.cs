@@ -8,6 +8,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Newtonsoft.Json;
 using SwgohHelpApi;
 using SwgohHelpApi.Model;
 using SwgohHelpApi.Model.Crinolo;
@@ -35,11 +36,6 @@ namespace SwgohCompareAngular.Controllers
             _testUsername = configuration["SwgohHelpAuth:username"];
             _testPassword = configuration["SwgohHelpAuth:password"];
         }
-        [HttpGet("[action]")]
-        public List<LocalizedUnit> UnitList()
-        {
-            return GetLocalizedUnits();
-        }
 
         private List<LocalizedUnit> GetLocalizedUnits()
         {
@@ -56,13 +52,49 @@ namespace SwgohCompareAngular.Controllers
                 // Set cache options.
                 var cacheEntryOptions = new MemoryCacheEntryOptions()
                     // Keep in cache for this time, reset time if accessed.
-                    .SetSlidingExpiration(TimeSpan.FromMinutes(5));
+                    .SetSlidingExpiration(TimeSpan.FromMinutes(20));
 
                 // Save data in cache.
                 _cache.Set(LocalUnitEntry, localizedUnits);
             }
             return localizedUnits;
         }
+
+        /// <summary>
+        /// Returns a list of units common to both ally codes passed in
+        /// </summary>
+        /// <param name="codes"></param>
+        /// <returns></returns>
+        [HttpPost("[action]")]
+        public List<LocalizedUnit> UnitListForPlayers(IEnumerable<string> codes)
+        {
+            List<LocalizedUnit> localizedUnits;
+            UnitDict PlayerOne;
+            UnitDict PlayerTwo;
+
+            var helper = Authenticate();
+
+            localizedUnits = GetLocalizedUnits();
+
+            var codesToRequest = new List<string>(codes);
+
+            var players = Task.Run(() =>
+            {
+                GetPlayerOneAndTwoFromHelp(codesToRequest);
+            });
+            
+            List<UnitDict> playerOneandTwo = GetPlayerOneAndTwo(codesToRequest);
+
+            PlayerOne = playerOneandTwo[0];
+            PlayerTwo = playerOneandTwo[1];
+
+            var filteredPlayerUnits = PlayerOne.Where(x => PlayerTwo.Any(y => y.Key == x.Key));
+
+            var filteredUnits = localizedUnits.Where(x => filteredPlayerUnits.Any(y => y.Key == x.BaseId));
+
+            return filteredUnits.ToList();
+        }
+
         private List<Player> GetPlayerOneAndTwoFromHelp(List<string> codesToRequest)
         {
             Player PlayerOne;
@@ -96,6 +128,57 @@ namespace SwgohCompareAngular.Controllers
                 var helper = Authenticate();
                 players = helper.fetchPlayers(options);
 
+                foreach (var code in codesToRequest)
+                {
+                    if (PlayerOne == null)
+                    {
+                        PlayerOne = players.Where(x => x.AllyCode.ToString() == code).First();
+                    }
+                    else if (PlayerTwo == null)
+                    {
+                        PlayerTwo = players.Where(x => x.AllyCode.ToString() == code).First();
+                    }
+
+                    SetCacheValue(code, sourceHelp, players.Where(x => x.AllyCode.ToString() == code).First());
+                }
+            }
+            return new List<Player>() { PlayerOne, PlayerTwo };
+        }
+
+        private async Task<List<Player>> GetPlayerOneAndTwoFromHelpAsync(List<string> codesToRequest)
+        {
+            Player PlayerOne;
+            Player PlayerTwo;
+            List<Player> players;
+
+            string PlayerOneCode = codesToRequest[0];
+            string PlayerTwoCode = codesToRequest[1];
+
+            //Check if PlayerOne is in the cache
+            if (GetCacheValue(PlayerOneCode, sourceHelp, out PlayerOne))
+            {
+                codesToRequest.Remove(PlayerOneCode);
+            }
+
+            //Check if PlayerTwo is in the cache
+            if (GetCacheValue(PlayerTwoCode, sourceHelp, out PlayerTwo))
+            {
+                codesToRequest.Remove(PlayerTwoCode);
+            }
+
+            var options = new RequestOptions
+            {
+                allycodes = new List<int>() { int.Parse(PlayerOneCode), int.Parse(PlayerTwoCode) },
+                language = "eng_us",
+                enums = true
+            };
+
+            if (codesToRequest.Count > 0)
+            {
+                var helper = Authenticate();
+                var returnVal = await helper.fetchPlayersAsync(options);
+
+                players = JsonConvert.DeserializeObject<List<Player>>(returnVal);
                 foreach (var code in codesToRequest)
                 {
                     if (PlayerOne == null)
@@ -151,35 +234,7 @@ namespace SwgohCompareAngular.Controllers
             return new List<UnitDict>() { PlayerOne, PlayerTwo };
         }
 
-        /// <summary>
-        /// Returns a list of units common to both ally codes passed in
-        /// </summary>
-        /// <param name="codes"></param>
-        /// <returns></returns>
-        [HttpPost("[action]")]
-        public List<LocalizedUnit> UnitListForPlayers(IEnumerable<string> codes)
-        {
-            List<LocalizedUnit> localizedUnits;
-            UnitDict PlayerOne;
-            UnitDict PlayerTwo;
-            
-            var helper = Authenticate();
-
-            localizedUnits = GetLocalizedUnits();
-
-            var codesToRequest = new List<string>(codes);
-
-            List<UnitDict> playerOneandTwo = GetPlayerOneAndTwo(codesToRequest);
-
-            PlayerOne = playerOneandTwo[0];
-            PlayerTwo = playerOneandTwo[1];
-
-            var filteredPlayerUnits = PlayerOne.Where(x => PlayerTwo.Any(y => y.Key == x.Key));
-
-            var filteredUnits = localizedUnits.Where(x => filteredPlayerUnits.Any(y => y.Key == x.BaseId));
-            
-            return filteredUnits.ToList();
-        }
+        
 
         [HttpPost("[action]")]
         public PlayerInformation GetUnitInformationForPlayers(List<string> comparisonInfo)
@@ -218,24 +273,6 @@ namespace SwgohCompareAngular.Controllers
             return pinfo;
         }
 
-        // POST: api/Unit
-        [HttpPost]
-        public void Post([FromBody] string value)
-        {
-        }
-
-        // PUT: api/Unit/5
-        [HttpPut("{id}")]
-        public void Put(int id, [FromBody] string value)
-        {
-        }
-
-        // DELETE: api/ApiWithActions/5
-        [HttpDelete("{id}")]
-        public void Delete(int id)
-        {
-        }
-        
         private SwgohHelper Authenticate()
         {
             SwgohHelper helper;
@@ -248,6 +285,27 @@ namespace SwgohCompareAngular.Controllers
             }
 
             return helper;
+        }
+
+        private async void AuthenticateAsync()
+        {
+            SwgohHelper helper;
+            
+            if (_cache.TryGetValue(HelperEntry, out helper))
+            {
+                return;
+            }
+            else
+            {
+                await Task.Run(() =>
+                {
+                    helper = new SwgohHelper(new UserSettings() { Username = _testUsername, Password = _testPassword, Debug = "true" });
+                    helper.Login();
+                    SetCacheValue(HelperEntry, sourceHelp, helper);
+                }
+                );
+                
+            }
         }
 
         private Dictionary<string, string> GetPlayerEntries(List<string> codes, string source)

@@ -52,3 +52,25 @@
   vertical-align: middle;
   max-height: 56px;
 }
+
+.imgSkills{
+  padding-right:7px;
+  float:left;
+}
+
+.skillItem {
+  padding-bottom: 5px;
+}
+
+.skillName {
+  font-size: 16px;
+}
+
+.maxedSkill {
+  color: #B5B4B3;
+  font-size: 16px;
+}
+
+.skillDivider{
+  clear:both;
+}

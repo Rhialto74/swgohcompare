@@ -55,33 +55,4 @@
   </mat-step>
 </mat-vertical-stepper>
 
-<!-- Old Below -->
-
-<!--<p>
-  <mat-form-field>
-    <input matInput placeholder="First Player Ally Code" [formControl]="allyCodeOne" />
-  </mat-form-field>
-</p>
-<p>
-  <mat-form-field>
-    <input matInput placeholder="Second Player Ally Code" [formControl]="allyCodeTwo" />
-  </mat-form-field>
-</p>
-
-<button mat-raised-button name="buttonPopulate" (click)="getDropDownList()">Get Units</button>
-<mat-spinner *ngIf="showProgress"></mat-spinner>
-  <p>
-    <mat-form-field *ngIf="units">
-      <input type="text" placeholder="-- Select A Character --" matInput [formControl]="compControl" [matAutocomplete]="auto">
-      <mat-autocomplete #auto="matAutocomplete" [displayWith]="displayFn" (optionSelected)="getDataTables()">
-        <mat-option *ngFor="let unit of filteredUnits | async" [value]="unit">
-          {{ unit.nameKey }}
-        </mat-option>
-      </mat-autocomplete>
-    </mat-form-field>
-  </p>
-
-<app-comparison-table [roster]="roster"></app-comparison-table>
-<app-comparison-stat-table [unitdata]="unitData"></app-comparison-stat-table>-->
-
 
