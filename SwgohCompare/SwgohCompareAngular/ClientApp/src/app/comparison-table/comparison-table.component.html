@@ -15,25 +15,6 @@
     <th mat-header-cell *matHeaderCellDef> Level </th>
     <td mat-cell *matCellDef="let element"> {{element.level}} </td>
   </ng-container>
-  <ng-container matColumnDef="character">
-    <th mat-header-cell *matHeaderCellDef> Gear </th>
-    <td mat-cell *matCellDef="let element" style="">
-      <div style="width:150px">
-        <div style="width:50%; float:left;" *ngFor="let equip of element.character.gearSlots; index as i">
-          <span style="width:56px;" *ngIf="i < 3">
-            <span class="helper"></span><img src="{{equip.imageUrl}}" alt="{{equip.name}}" width="56" height="56" class="imgGear" *ngIf="equip.equipped; else elseBlock" />
-            <ng-template #elseBlock><img src="{{equip.imageUrl}}" alt="{{equip.name}}" width="56" height="56" class="imgGearDisabled" /></ng-template>
-          </span>
-        </div>
-        <div style="width:50%; float:left;" *ngFor="let equip of element.character.gearSlots; index as i">
-          <span style="width:56px;" *ngIf="i >= 3">
-            <span class="helper"></span><img src="{{equip.imageUrl}}" alt="{{equip.name}}" width="56" height="56" class="imgGear" *ngIf="equip.equipped; else elseBlock" />
-            <ng-template #elseBlock><img src="{{equip.imageUrl}}" alt="{{equip.name}}" width="56" height="56" class="imgGearDisabled" /></ng-template>
-          </span>
-        </div>
-      </div>
-    </td>
-  </ng-container>
   <tr mat-header-row *matHeaderRowDef="columnsToDisplay"></tr>
   <tr mat-row *matRowDef="let myRowData; columns: columnsToDisplay;  odd as isOdd" [ngClass]="{'highlight-row' : isOdd}"></tr>
 </table>
@@ -50,14 +31,6 @@
         <mat-divider [inset]="true" *ngIf="!last" class="skillDivider"></mat-divider>
 
       </div>
-      <!--<mat-list>
-        <mat-list-item *ngFor="let skill of sortSkills('id', roster.skills)">
-          <img src="{{getAbilityImages(skill.id)}}" alt="{{skill.nameKey}}" width="56" height="56" class="imgSkills" matListAvatar />
-          {{skill.nameKey}}<br />
-          <span [ngClass]="{'maxedSkill' : skill.tier === 8 }">{{skill.tier === 8 ? "MAXED" : "Level " + skill.tier}} ({{getAbilityType(skill.id)}})</span>
-          <mat-divider [inset]="false" *ngIf="!last"></mat-divider>
-        </mat-list-item>
-      </mat-list>-->
     </mat-card-content>
   </mat-card>
 </div>
@@ -67,17 +40,22 @@
     <mat-card-title> Gear Level {{roster.gear}}</mat-card-title>
     <mat-card-subtitle>{{roster.playerName}}</mat-card-subtitle>
     <div style="width:150px">
-      <div style="width:50%; float:left;" *ngFor="let equip of roster.character.gearSlots; index as i">
-        <span style="width:56px;" *ngIf="i < 3">
-          <span class="helper"></span><img src="{{equip.imageUrl}}" alt="{{equip.name}}" width="56" height="56" class="imgGear" *ngIf="equip.equipped; else elseBlock" />
-          <ng-template #elseBlock><img src="{{equip.imageUrl}}" alt="{{equip.name}}" width="56" height="56" class="imgGearDisabled" /></ng-template>
-        </span>
-      </div>
-      <div style="width:50%; float:left;" *ngFor="let equip of roster.character.gearSlots; index as i">
-        <span style="width:56px;" *ngIf="i >= 3">
-          <span class="helper"></span><img src="{{equip.imageUrl}}" alt="{{equip.name}}" width="56" height="56" class="imgGear" *ngIf="equip.equipped; else elseBlock" />
-          <ng-template #elseBlock><img src="{{equip.imageUrl}}" alt="{{equip.name}}" width="56" height="56" class="imgGearDisabled" /></ng-template>
-        </span>
+      
+      <div style="width:50%; float:left;">
+        <div *ngFor="let equip of roster.character.gearSlots; index as i">
+          <div *ngIf="i < 3">
+            <span class="helper"></span><img src="{{roster.character.gearSlots[i].imageUrl}}" alt="{{roster.character.gearSlots[i].name}}" width="56" height="56" class="imgGear" *ngIf="equip.equipped; else elseBlock" />
+            <ng-template #elseBlock><img src="{{roster.character.gearSlots[i].imageUrl}}" alt="{{roster.character.gearSlots[i].name}}" width="56" height="56" class="imgGearDisabled" /></ng-template>
+          </div>
+          </div>
+        </div>
+      <div style="width:50%; float:left;">
+        <div *ngFor="let equip of roster.character.gearSlots; index as i">
+          <div *ngIf="i >= 3">
+            <span class="helper"></span><img src="{{roster.character.gearSlots[i].imageUrl}}" alt="{{roster.character.gearSlots[i].name}}" width="56" height="56" class="imgGear" *ngIf="equip.equipped; else elseBlock" />
+            <ng-template #elseBlock><img src="{{roster.character.gearSlots[i].imageUrl}}" alt="{{roster.character.gearSlots[i].name}}" width="56" height="56" class="imgGearDisabled" /></ng-template>
+          </div>
+        </div>
       </div>
     </div>
   </mat-card>

@@ -84,7 +84,13 @@ export class ComparisonDropDownComponent implements OnInit {
       this.allyCodeTwo.setValue(val);
     });
   }
-
+  resetForm() {
+    this.compControl.setValue('');
+    this.units = null;
+    this.roster = null;
+    this.unitData = null;
+    this.tiers = null;
+  }
   //Displays the name of the unit selected in the dropdown box
   displayFn(unit?: RosterModel.LocalizedUnit): string | undefined {
     return unit ? unit.nameKey : undefined;
@@ -99,10 +105,11 @@ export class ComparisonDropDownComponent implements OnInit {
   //Populates the dropdown list
   public getDropDownList() {
     this.showProgress = true;
+    this.resetForm();
     localStorage.setItem(this.allyCodeOne.value, this.allyCodeOne.value);
     localStorage.setItem(this.allyCodeTwo.value, this.allyCodeTwo.value);
     let allyCodes: number[] = [this.allyCodeOne.value, this.allyCodeTwo.value];
-    this.units = null;
+    
     this.unitSvc.GetUnitsForDropDownList(allyCodes).subscribe(result => {
       this.showProgress = false;
       this.units = result;
