@@ -1,21 +1,47 @@
 <mat-vertical-stepper [linear]="false" [selectedIndex]="stepperIndex" #stepper>
   <mat-step [stepControl]="firstFormGroup">
-    <form [formGroup]="firstFormGroup">
-      <ng-template matStepLabel>Enter the ally codes for comparison - no dashes or spaces. <b>Note:</b> Initial load of each section is slow.</ng-template>
-      <p>
-        <mat-form-field>
-          <input matInput placeholder="First Player Ally Code" [formControl]="allyCodeOne" required />
-        </mat-form-field>
-      </p>
-      <p>
-        <mat-form-field>
-          <input matInput placeholder="Second Player Ally Code" [formControl]="allyCodeTwo" required />
-        </mat-form-field>
-      </p>
-      <div>
-        <button mat-raised-button matStepperNext name="buttonPopulate" (click)="getDropDownList()">Next</button>
-      </div>
-    </form>
+    <div class="allyCodeRow">
+      <form [formGroup]="firstFormGroup">
+        <div class="allyCodeColumn">
+
+          <ng-template matStepLabel>Enter the ally codes for comparison - no dashes or spaces <span *ngIf="storageAvailable('localStorage')"><br />OR select from your previously entered codes on the right.</span><br /><b>NOTE:</b> Initial load of player units is slow.</ng-template>
+          <p>
+            <mat-form-field>
+              <input matInput placeholder="First Player Ally Code" [formControl]="allyCodeOne" required />
+            </mat-form-field>
+          </p>
+          <p>
+            <mat-form-field>
+              <input matInput placeholder="Second Player Ally Code" [formControl]="allyCodeTwo" required />
+            </mat-form-field>
+          </p>
+          <div>
+            <button mat-raised-button matStepperNext name="buttonPopulate" (click)="getDropDownList()">Next</button>
+          </div>
+
+        </div>
+        <div class="allyCodeColumn" *ngIf="storageAvailable('localStorage')">
+          <p>
+            <mat-form-field>
+              <mat-select matInput placeholder="Select a previously entered code" [formControl]="allyPreviousCodeOne">
+                <mat-option *ngFor="let code of allStorage()" [value]="code">
+                  {{ code }}
+                </mat-option>
+              </mat-select>
+            </mat-form-field>
+          </p>
+          <p>
+            <mat-form-field>
+              <mat-select matInput placeholder="Select a previously entered code" [formControl]="allyPreviousCodeTwo">
+                <mat-option *ngFor="let code of allStorage()" [value]="code">
+                  {{ code }}
+                </mat-option>
+              </mat-select>
+            </mat-form-field>
+          </p>
+        </div>
+      </form>
+    </div>
   </mat-step>
   <mat-step [stepControl]="secondFormGroup">
     <form [formGroup]="secondFormGroup">

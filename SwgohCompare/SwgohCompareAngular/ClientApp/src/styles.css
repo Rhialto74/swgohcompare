@@ -74,3 +74,18 @@
 .skillDivider{
   clear:both;
 }
+
+.allyCodeRow {
+  margin-bottom: 10px;
+}
+
+.allyCodeRow:after {
+  content: "";
+  display: table;
+  clear: both;
+}
+
+.allyCodeColumn {
+  float: left;
+  padding: 5px;
+}

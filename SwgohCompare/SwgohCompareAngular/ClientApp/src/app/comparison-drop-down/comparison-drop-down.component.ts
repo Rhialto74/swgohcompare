@@ -1,7 +1,6 @@
 import { Component, OnInit, Inject, isDevMode } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
 import { FormControl, FormBuilder, FormGroup, Validators } from '@angular/forms';
-import { Observable } from 'rxjs';
+import { Observable, Subject } from 'rxjs';
 import { map, startWith } from 'rxjs/operators';
 import { RosterModel } from '../model/RosterModel';
 import { GearModel } from '../model/GearModel';
@@ -22,14 +21,14 @@ export class ComparisonDropDownComponent implements OnInit {
   allyCodeOne = new FormControl();
   allyCodeTwo = new FormControl();
   charDropDown = new FormControl();
+  allyPreviousCodeOne = new FormControl();
+  allyPreviousCodeTwo = new FormControl();
   
   public units: RosterModel.LocalizedUnit[];
   public roster: RosterModel.Roster[];
   public unitData: RosterModel.UnitData[];
   public tiers: RosterModel.UnitTierList[];
   filteredUnits: Observable<RosterModel.LocalizedUnit[]>;
-  http: HttpClient;
-  baseUrl: string;
   allgear: GearModel.Gear[];
   
   gearitem: GearModel.Gear;
@@ -48,20 +47,19 @@ export class ComparisonDropDownComponent implements OnInit {
   stepperIndex: number;
   objectMapper: RosterModel.MapObjectLookup[];
   players: string[];
-  
+  storedKeys: Subject<string[]>;
 
   //Main body
-  constructor(private httpClient: HttpClient, @Inject('BASE_URL') private baseU: string, private _formBuilder: FormBuilder, unitService: UnitService) {
-    this.http = httpClient;
-    this.baseUrl = baseU;
+  constructor(private _formBuilder: FormBuilder, unitService: UnitService) {
     this.unitSvc = unitService;
-
+    this.storedKeys = new Subject<string[]>();
     //if (isDevMode()) {
     //  this.allyCodeOne.setValue(362676873);
     //  this.allyCodeTwo.setValue(999531726);
     //}
     this.players = [];
-        
+
+    
 
     this.unitSvc.GetAllGear().subscribe(result => {
       this.allgear = result;
@@ -76,6 +74,14 @@ export class ComparisonDropDownComponent implements OnInit {
     });
     this.secondFormGroup = this._formBuilder.group({
       secondCtrl: ['', Validators.required]
+    });
+
+    this.allyPreviousCodeOne.valueChanges.subscribe(val => {
+      this.allyCodeOne.setValue(val);
+    });
+
+    this.allyPreviousCodeTwo.valueChanges.subscribe(val => {
+      this.allyCodeTwo.setValue(val);
     });
   }
 
@@ -93,6 +99,8 @@ export class ComparisonDropDownComponent implements OnInit {
   //Populates the dropdown list
   public getDropDownList() {
     this.showProgress = true;
+    localStorage.setItem(this.allyCodeOne.value, this.allyCodeOne.value);
+    localStorage.setItem(this.allyCodeTwo.value, this.allyCodeTwo.value);
     let allyCodes: number[] = [this.allyCodeOne.value, this.allyCodeTwo.value];
     this.units = null;
     this.unitSvc.GetUnitsForDropDownList(allyCodes).subscribe(result => {
@@ -175,6 +183,43 @@ export class ComparisonDropDownComponent implements OnInit {
 
   public setCompControlValue() {
     this.compControl.setValue('');
+  }
+
+  public allStorage() {
+    
+    var values = [],
+      keys = Object.keys(localStorage),
+      i = keys.length;
+
+    while (i--) {
+      values.push(localStorage.getItem(keys[i]));
+    }
+
+    return values;
+  }
+
+  public storageAvailable(type) {
+    try {
+      var storage = window[type],
+        x = '__storage_test__';
+      storage.setItem(x, x);
+      storage.removeItem(x);
+      return true;
+    }
+    catch (e) {
+      return e instanceof DOMException && (
+        // everything except Firefox
+        e.code === 22 ||
+        // Firefox
+        e.code === 1014 ||
+        // test name field too, because code might not be present
+        // everything except Firefox
+        e.name === 'QuotaExceededError' ||
+        // Firefox
+        e.name === 'NS_ERROR_DOM_QUOTA_REACHED') &&
+        // acknowledge QuotaExceededError only if there's something already stored
+        storage.length !== 0;
+    }
   }
 }
 
