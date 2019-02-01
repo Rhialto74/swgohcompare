@@ -12,6 +12,8 @@ import { ComparisonDropDownComponent } from './comparison-drop-down/comparison-d
 import { ComparisonTableComponent } from './comparison-table/comparison-table.component';
 import { ComparisonStatTableComponent } from './comparison-stat-table/comparison-stat-table.component';
 import { HttpErrorInterceptor } from './providers/http-error.interceptor';
+import { ComparisonModsComponent } from './comparison-mods/comparison-mods.component';
+import { CustomPercentPipe } from './providers/custompercent.pipe';
 
 
 @NgModule({
@@ -21,7 +23,9 @@ import { HttpErrorInterceptor } from './providers/http-error.interceptor';
     HomeComponent,
     ComparisonDropDownComponent,
     ComparisonTableComponent,
-    ComparisonStatTableComponent
+    ComparisonStatTableComponent,
+    ComparisonModsComponent,
+    CustomPercentPipe
   ],
   imports: [
     HttpClientModule,

@@ -1,30 +1,34 @@
-<table mat-table [dataSource]="getLookupsForComparison()" class="mat-elevation-z8 mat-table" *ngIf="unitDataInput" style="width:100%">
+<table mat-table [dataSource]="mapper" class="mat-elevation-z8 mat-table" *ngIf="unitDataInput" style="width:100%">
   <ng-container matColumnDef="statName">
     <th mat-header-cell *matHeaderCellDef> Stat Name</th>
     <td mat-cell *matCellDef="let element"> {{element.statName}} </td>
   </ng-container>
   <ng-container matColumnDef="statValueP1">
-    <th mat-header-cell *matHeaderCellDef> {{players[0]}} </th>
+    <th mat-header-cell *matHeaderCellDef> {{players[0]}} <br /> Total (Mod)</th>
     <td mat-cell *matCellDef="let element">
       <span *ngIf="isAPercentage(element.statName);  else elseBlock">
-        <span [class.isGreater]="isGreater(element.statValueP1,element.statValueP2)">{{element.statValueP1 | percent}}</span>
+        <span [ngClass]="isGreater(element.statValueP1,element.statValueP2) ? 'isGreater': 'isLesser'">{{element.statValueP1 | percent}}</span>
+        <span *ngIf="element.statModValueP2" class="isLesser">({{element.statModValueP1 | percent}})</span>
       </span>
       <ng-template #elseBlock>
         <span>
-          <span [class.isGreater]="isGreater(element.statValueP1,element.statValueP2)">{{element.statValueP1}}</span>
+          <span [ngClass]="isGreater(element.statValueP1,element.statValueP2) ? 'isGreater': 'isLesser'">{{element.statValueP1}}</span>
+          <span *ngIf="element.statModValueP1" class="isLesser">({{element.statModValueP1}})</span>
         </span>
       </ng-template>
     </td>
   </ng-container>
   <ng-container matColumnDef="statValueP2">
-    <th mat-header-cell *matHeaderCellDef> {{players[1]}} </th>
+    <th mat-header-cell *matHeaderCellDef> {{players[1]}} <br /> Total (Mod)</th>
     <td mat-cell *matCellDef="let element">
       <span *ngIf="isAPercentage(element.statName);  else elseBlock">
-        <span [class.isGreater]="isGreater(element.statValueP2,element.statValueP2)">{{element.statValueP2 | percent}}</span>
+        <span [ngClass]="isGreater(element.statValueP2,element.statValueP1) ? 'isGreater': 'isLesser'">{{element.statValueP2 | percent}}</span>
+        <span *ngIf="element.statModValueP2" class="isLesser">({{element.statModValueP2 | percent}})</span>
       </span>
       <ng-template #elseBlock>
         <span>
-          <span [class.isGreater]="isGreater(element.statValueP2,element.statValueP1)">{{element.statValueP2}}</span>
+          <span [ngClass]="isGreater(element.statValueP2,element.statValueP1) ? 'isGreater': 'isLesser'">{{element.statValueP2}} </span>
+          <span *ngIf="element.statModValueP2" class="isLesser">({{element.statModValueP2}})</span>
         </span>
       </ng-template>
     </td>

@@ -35,6 +35,8 @@
     <None Remove="ClientApp\src\app\model\CharacterComparer.ts" />
     <None Remove="ClientApp\src\app\model\GearModel.ts" />
     <None Remove="ClientApp\src\app\model\RosterModel.ts" />
+    <None Remove="ClientApp\src\app\providers\custompercent.pipe.ts" />
+    <None Remove="ClientApp\src\typings.d.ts" />
   </ItemGroup>
 
   <ItemGroup>
@@ -46,6 +48,8 @@
     <TypeScriptCompile Include="ClientApp\src\app\model\AbilityModel.ts" />
     <TypeScriptCompile Include="ClientApp\src\app\model\GearModel.ts" />
     <TypeScriptCompile Include="ClientApp\src\app\model\RosterModel.ts" />
+    <TypeScriptCompile Include="ClientApp\src\app\providers\custompercent.pipe.ts" />
+    <TypeScriptCompile Include="ClientApp\src\typings.d.ts" />
   </ItemGroup>
 
   <Target Name="DebugEnsureNodeEnv" BeforeTargets="Build" Condition=" '$(Configuration)' == 'Debug' And !Exists('$(SpaRoot)node_modules') ">

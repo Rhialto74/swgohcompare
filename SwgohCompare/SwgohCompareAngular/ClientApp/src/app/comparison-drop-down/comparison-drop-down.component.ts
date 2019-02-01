@@ -192,6 +192,10 @@ export class ComparisonDropDownComponent implements OnInit {
     this.compControl.setValue('');
   }
 
+  public clearStorage() {
+    localStorage.clear();
+  }
+  //Shows all values in local storage
   public allStorage() {
     
     var values = [],
@@ -205,6 +209,7 @@ export class ComparisonDropDownComponent implements OnInit {
     return values;
   }
 
+  //Checks if local storage is available
   public storageAvailable(type) {
     try {
       var storage = window[type],

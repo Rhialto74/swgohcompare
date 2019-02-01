@@ -18,45 +18,58 @@
   <tr mat-header-row *matHeaderRowDef="columnsToDisplay"></tr>
   <tr mat-row *matRowDef="let myRowData; columns: columnsToDisplay;  odd as isOdd" [ngClass]="{'highlight-row' : isOdd}"></tr>
 </table>
+<mat-accordion multi="true" displayMode="flat">
+  <mat-expansion-panel [expanded]="true">
+    <mat-expansion-panel-header>
+      <mat-panel-title class="sectionHeader">
+        SKILLS
+      </mat-panel-title>
+    </mat-expansion-panel-header>
+    <div class="statRow" *ngIf="rosterInput">
+      <mat-card class="statColumn" *ngFor="let roster of rosterInput">
+        <mat-card-subtitle>{{roster.playerName}}</mat-card-subtitle>
+        <mat-card-content>
+          <div *ngFor="let skill of sortSkills('id', roster.skills)" class="skillItem">
+            <img src="{{getAbilityImages(skill.id)}}" alt="{{skill.nameKey}}" width="56" height="56" class="imgSkills" />
+            <span class="skillName">{{skill.nameKey}}</span><br />
+            <span [ngClass]="{'maxedSkill' : skill.tier === 8 }">{{skill.tier === 8 ? "MAXED" : "Level " + skill.tier}} ({{getAbilityType(skill.id)}})</span>
+            <mat-divider [inset]="true" *ngIf="!last" class="skillDivider"></mat-divider>
 
-<div class="statRow" *ngIf="rosterInput">
-  <mat-card class="statColumn" *ngFor="let roster of rosterInput">
-    <mat-card-title> Skills </mat-card-title>
-    <mat-card-subtitle>{{roster.playerName}}</mat-card-subtitle>
-    <mat-card-content>
-      <div *ngFor="let skill of sortSkills('id', roster.skills)" class="skillItem">
-        <img src="{{getAbilityImages(skill.id)}}" alt="{{skill.nameKey}}" width="56" height="56" class="imgSkills" />
-        <span class="skillName">{{skill.nameKey}}</span><br />
-        <span [ngClass]="{'maxedSkill' : skill.tier === 8 }">{{skill.tier === 8 ? "MAXED" : "Level " + skill.tier}} ({{getAbilityType(skill.id)}})</span>
-        <mat-divider [inset]="true" *ngIf="!last" class="skillDivider"></mat-divider>
-
-      </div>
-    </mat-card-content>
-  </mat-card>
-</div>
-
-<div class="statRow" *ngIf="rosterInput">
-  <mat-card class="statColumn" *ngFor="let roster of rosterInput">
-    <mat-card-title> Gear Level {{roster.gear}}</mat-card-title>
-    <mat-card-subtitle>{{roster.playerName}}</mat-card-subtitle>
-    <div style="width:150px">
-      
-      <div style="width:50%; float:left;">
-        <div *ngFor="let equip of roster.character.gearSlots; index as i">
-          <div *ngIf="i < 3">
-            <span class="helper"></span><img src="{{roster.character.gearSlots[i].imageUrl}}" alt="{{roster.character.gearSlots[i].name}}" width="56" height="56" class="imgGear" *ngIf="equip.equipped; else elseBlock" />
-            <ng-template #elseBlock><img src="{{roster.character.gearSlots[i].imageUrl}}" alt="{{roster.character.gearSlots[i].name}}" width="56" height="56" class="imgGearDisabled" /></ng-template>
           </div>
-          </div>
-        </div>
-      <div style="width:50%; float:left;">
-        <div *ngFor="let equip of roster.character.gearSlots; index as i">
-          <div *ngIf="i >= 3">
-            <span class="helper"></span><img src="{{roster.character.gearSlots[i].imageUrl}}" alt="{{roster.character.gearSlots[i].name}}" width="56" height="56" class="imgGear" *ngIf="equip.equipped; else elseBlock" />
-            <ng-template #elseBlock><img src="{{roster.character.gearSlots[i].imageUrl}}" alt="{{roster.character.gearSlots[i].name}}" width="56" height="56" class="imgGearDisabled" /></ng-template>
-          </div>
-        </div>
-      </div>
+        </mat-card-content>
+      </mat-card>
     </div>
-  </mat-card>
-</div>
+  </mat-expansion-panel>
+  <mat-expansion-panel [expanded]="true">
+    <mat-expansion-panel-header>
+      <mat-panel-title class="sectionHeader">
+        GEAR
+      </mat-panel-title>
+    </mat-expansion-panel-header>
+    <div class="statRow" *ngIf="rosterInput">
+      <mat-card class="statColumn" *ngFor="let roster of rosterInput">
+        <mat-card-title> Gear Level {{roster.gear}}</mat-card-title>
+        <mat-card-subtitle>{{roster.playerName}}</mat-card-subtitle>
+        <div style="width:150px">
+
+          <div style="width:50%; float:left;">
+            <div *ngFor="let equip of roster.character.gearSlots; index as i">
+              <div *ngIf="i < 3">
+                <span class="helper"></span><img src="{{roster.character.gearSlots[i].imageUrl}}" alt="{{roster.character.gearSlots[i].name}}" width="56" height="56" class="imgGear" *ngIf="equip.equipped; else elseBlock" />
+                <ng-template #elseBlock><img src="{{roster.character.gearSlots[i].imageUrl}}" alt="{{roster.character.gearSlots[i].name}}" width="56" height="56" class="imgGearDisabled" /></ng-template>
+              </div>
+            </div>
+          </div>
+          <div style="width:50%; float:left;">
+            <div *ngFor="let equip of roster.character.gearSlots; index as i">
+              <div *ngIf="i >= 3">
+                <span class="helper"></span><img src="{{roster.character.gearSlots[i].imageUrl}}" alt="{{roster.character.gearSlots[i].name}}" width="56" height="56" class="imgGear" *ngIf="equip.equipped; else elseBlock" />
+                <ng-template #elseBlock><img src="{{roster.character.gearSlots[i].imageUrl}}" alt="{{roster.character.gearSlots[i].name}}" width="56" height="56" class="imgGearDisabled" /></ng-template>
+              </div>
+            </div>
+          </div>
+        </div>
+      </mat-card>
+    </div>
+  </mat-expansion-panel>
+</mat-accordion>

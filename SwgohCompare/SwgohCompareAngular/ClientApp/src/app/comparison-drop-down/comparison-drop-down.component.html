@@ -17,6 +17,7 @@
           </p>
           <div>
             <button mat-raised-button matStepperNext name="buttonPopulate" (click)="getDropDownList()">Next</button>
+            <button mat-raised-button name="buttonClear" (click)="clearStorage()" style="margin-left:50px;">Clear Stored Codes</button>
           </div>
 
         </div>
@@ -66,17 +67,43 @@
     <ng-template matStepLabel>Results</ng-template>
     <mat-spinner *ngIf="showProgressStepThree"></mat-spinner>
     <div *ngIf="!showProgressStepThree">
-      <h1 *ngIf="roster">{{roster[0].nameKey}}</h1>
+      <div class="bigName" *ngIf="roster">{{roster[0].nameKey}}</div>
       <mat-divider></mat-divider>
       <app-comparison-table [roster]="roster"></app-comparison-table>
       <br />
-      <h1>Stats</h1>
-      <mat-divider></mat-divider>
-      <app-comparison-stat-table [unitdata]="unitData"></app-comparison-stat-table>
-      <div *ngIf="roster">
-        <button mat-button matStepperPrevious>Back</button>
-        <button mat-button (click)="stepper.reset()">Reset</button>
-      </div>
+      <mat-accordion multi="true" displayMode="flat">
+        <mat-expansion-panel [expanded]="true">
+          <mat-expansion-panel-header>
+            <mat-panel-title class="sectionHeader">
+              STATS
+            </mat-panel-title>
+            <mat-panel-description>
+              
+            </mat-panel-description>
+          </mat-expansion-panel-header>
+
+          <app-comparison-stat-table [unitdata]="unitData"></app-comparison-stat-table>
+
+        </mat-expansion-panel>
+        <mat-expansion-panel [expanded]="true">
+          <mat-expansion-panel-header>
+            <mat-panel-title class="sectionHeader">
+              MODS
+            </mat-panel-title>
+            <mat-panel-description>
+              
+            </mat-panel-description>
+          </mat-expansion-panel-header>
+
+          <app-comparison-mods [roster]="roster"></app-comparison-mods>
+
+        </mat-expansion-panel>
+        
+      </mat-accordion>
+        <div *ngIf="roster">
+          <button mat-button matStepperPrevious>Back</button>
+          <button mat-button (click)="stepper.reset()">Reset</button>
+        </div>
     </div>
   </mat-step>
 </mat-vertical-stepper>

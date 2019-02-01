@@ -1,5 +1,6 @@
 import { Component, OnInit, Input, Inject } from '@angular/core';
 import { RosterModel } from '../model/RosterModel';
+import { CommonService } from '../providers/common.service';
 
 @Component({
   selector: 'app-comparison-stat-table',
@@ -12,24 +13,27 @@ export class ComparisonStatTableComponent implements OnInit {
   @Input('unitdata') unitDataInput: RosterModel.UnitData[];
   objectKeys = Object.keys;
   mapper: mapStatLookup[];
+  commonService: CommonService;
   players: string[];
 
   columnsToDisplay = ['statName', 'statValueP1', 'statValueP2'];
 
-  constructor() {
+  constructor(_commonService: CommonService) {
     this.mapper = [];
     this.players = [];
+    this.commonService = _commonService;
   }
 
   ngOnInit() {
     
   }
+  ngOnChanges() {
+    if (this.unitDataInput)
+      this.getLookupsForComparison();
+  }
 
-  public isAPercentage(key: string) {
-    if (key == 'Potency' || key == 'Tenacity' || key == 'Armor' || key == 'Resistance' || key == 'Physical Critical Chance' || key == 'Critical Damage' || key == 'Special Critical Chance' || key == 'Health Steal')
-      return true;
-    else
-      return false;
+  private isAPercentage(item: string) {
+    return this.commonService.isAPercentage(item);
   }
 
   public isGreater(currentItem: number, otherItem: number) {
@@ -38,6 +42,7 @@ export class ComparisonStatTableComponent implements OnInit {
     }
   }
 
+  //Parse the stats and create an array of MapStatLookups for each player
   public getLookupsForComparison() {
     this.mapper = [];
     for (let item of this.unitDataInput) {
@@ -48,6 +53,9 @@ export class ComparisonStatTableComponent implements OnInit {
         if (found) {
           found.statValueP2 = item.stats.final[key];
 
+          if (item.stats.mods[key])
+            found.statModValueP2 = item.stats.mods[key]
+
           if (!this.players[1])
             this.players[1] = item.unit.player;
         }
@@ -55,14 +63,19 @@ export class ComparisonStatTableComponent implements OnInit {
           if (!this.players[0])
             this.players[0] = item.unit.player;
 
-          this.mapper.push(new mapStatLookup(key, item.stats.final[key], null));
+          if (item.stats.mods[key]) {
+            this.mapper.push(new mapStatLookup(key, item.stats.final[key], item.stats.mods[key], null, null));
+          }
+          else {
+            this.mapper.push(new mapStatLookup(key, item.stats.final[key], null, null, null));
+          }
+          
         }
       }
     }
-    return this.mapper;
   }
 }
 export class mapStatLookup {
-  constructor(public statName: string, public statValueP1: number, public statValueP2: number) { };
+  constructor(public statName: string, public statValueP1: number, public statModValueP1: number, public statValueP2: number, public statModValueP2: number) { };
 }
 

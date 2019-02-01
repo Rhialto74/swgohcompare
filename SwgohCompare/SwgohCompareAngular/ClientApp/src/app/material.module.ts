@@ -12,6 +12,8 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatStepperModule } from '@angular/material/stepper';
 import { MatDividerModule } from '@angular/material/divider';
 import { MatListModule } from '@angular/material/list';
+import { MatGridListModule } from '@angular/material/grid-list';
+import { MatExpansionModule } from '@angular/material/expansion';
 
 @NgModule({
   imports: [
@@ -27,7 +29,9 @@ import { MatListModule } from '@angular/material/list';
     MatProgressSpinnerModule,
     MatStepperModule,
     MatDividerModule,
-    MatListModule
+    MatListModule,
+    MatGridListModule,
+    MatExpansionModule
   ],
   exports: [
     MatButtonModule,
@@ -42,7 +46,9 @@ import { MatListModule } from '@angular/material/list';
     MatProgressSpinnerModule,
     MatStepperModule,
     MatDividerModule,
-    MatListModule
+    MatListModule,
+    MatGridListModule,
+    MatExpansionModule
   ]
 })
 export class MaterialModule { }

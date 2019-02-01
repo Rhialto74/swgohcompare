@@ -20,7 +20,11 @@
   background-color: yellow;
   color: black;
   font-weight:bold;
-  padding:5px;
+  padding:3px;
+}
+
+.isLesser {
+  padding: 3px;
 }
 
 .topResultTable{
@@ -88,4 +92,18 @@
 .allyCodeColumn {
   float: left;
   padding: 5px;
+}
+
+.sectionHeader {
+  font-weight: bold;
+  font-size: 18px;
+  color: beige;
+  text-transform: uppercase;
+}
+
+.bigName {
+  font-weight: bold;
+  font-size: 22px;
+  margin-top: 20px;
+  margin-bottom: 20px;
 }
