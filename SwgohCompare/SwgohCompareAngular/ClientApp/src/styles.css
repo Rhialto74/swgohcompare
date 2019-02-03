@@ -107,3 +107,8 @@
   margin-top: 20px;
   margin-bottom: 20px;
 }
+
+.flexContainer {
+  display:flex;
+  flex-wrap:wrap;
+}

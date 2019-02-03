@@ -15,11 +15,6 @@
               <input matInput placeholder="Second Player Ally Code" [formControl]="allyCodeTwo" required />
             </mat-form-field>
           </p>
-          <div>
-            <button mat-raised-button matStepperNext name="buttonPopulate" (click)="getDropDownList()">Next</button>
-            <button mat-raised-button name="buttonClear" (click)="clearStorage()" style="margin-left:50px;">Clear Stored Codes</button>
-          </div>
-
         </div>
         <div class="allyCodeColumn" *ngIf="storageAvailable('localStorage')">
           <p>
@@ -42,6 +37,13 @@
           </p>
         </div>
       </form>
+    </div>
+    <div class="flexContainer stepOne">
+      <button mat-raised-button matStepperNext name="buttonPopulate" (click)="getDropDownList()">Next</button>
+      
+      
+      <button mat-raised-button name="buttonClear" (click)="clearStorage()">Clear Stored Codes</button>
+      
     </div>
   </mat-step>
   <mat-step [stepControl]="secondFormGroup">
