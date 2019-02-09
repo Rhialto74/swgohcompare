@@ -14,6 +14,7 @@ import { ComparisonStatTableComponent } from './comparison-stat-table/comparison
 import { HttpErrorInterceptor } from './providers/http-error.interceptor';
 import { ComparisonModsComponent } from './comparison-mods/comparison-mods.component';
 import { CustomPercentPipe } from './providers/custompercent.pipe';
+import { CreditsComponent } from './credits/credits.component';
 
 
 @NgModule({
@@ -25,7 +26,8 @@ import { CustomPercentPipe } from './providers/custompercent.pipe';
     ComparisonTableComponent,
     ComparisonStatTableComponent,
     ComparisonModsComponent,
-    CustomPercentPipe
+    CustomPercentPipe,
+    CreditsComponent
   ],
   imports: [
     HttpClientModule,
@@ -35,7 +37,8 @@ import { CustomPercentPipe } from './providers/custompercent.pipe';
     BrowserAnimationsModule,
     MaterialModule,
     RouterModule.forRoot([
-      { path: '', component: HomeComponent, pathMatch: 'full' }
+      { path: '', component: HomeComponent, pathMatch: 'full' },
+      { path: 'credits', component: CreditsComponent, pathMatch: 'full' }
     ])
   ],
   providers: [

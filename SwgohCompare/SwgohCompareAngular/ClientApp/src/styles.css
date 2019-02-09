@@ -112,3 +112,17 @@
   display:flex;
   flex-wrap:wrap;
 }
+
+.disclaimer{
+  font-size:11px;
+  margin-top:10px;
+  text-align:center;
+}
+.credits{
+  font-size:11px;
+  text-align:center;
+  
+}
+  .credits a {
+    color: white !important;
+  }
