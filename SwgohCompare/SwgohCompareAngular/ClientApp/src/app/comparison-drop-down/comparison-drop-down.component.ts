@@ -7,6 +7,7 @@ import { GearModel } from '../model/GearModel';
 import { forEach } from '@angular/router/src/utils/collection';
 import { MatStepperModule, MatStepper } from '@angular/material/stepper';
 import { UnitService } from '../providers/unit.service';
+import { BreakpointObserver, Breakpoints } from '@angular/cdk/layout';
 
 
 @Component({
@@ -36,6 +37,7 @@ export class ComparisonDropDownComponent implements OnInit {
   playerNames: string[];
   showProgress: boolean;
   showProgressStepThree: boolean;
+  loadMobileMods: boolean;
   objectKeys = Object.keys;
 
   unitSvc: UnitService;
@@ -50,7 +52,7 @@ export class ComparisonDropDownComponent implements OnInit {
   storedKeys: Subject<string[]>;
 
   //Main body
-  constructor(private _formBuilder: FormBuilder, unitService: UnitService) {
+  constructor(private _formBuilder: FormBuilder, unitService: UnitService, breakpointObserver: BreakpointObserver) {
     this.unitSvc = unitService;
     this.storedKeys = new Subject<string[]>();
     //if (isDevMode()) {
@@ -59,7 +61,17 @@ export class ComparisonDropDownComponent implements OnInit {
     //}
     this.players = [];
 
-    
+    breakpointObserver.observe([
+      Breakpoints.Handset,
+      Breakpoints.Tablet
+    ]).subscribe(result => {
+      if (result.matches) {
+        this.loadMobileMods = true;
+      }
+      else {
+        this.loadMobileMods = false;
+      }
+    });
 
     this.unitSvc.GetAllGear().subscribe(result => {
       this.allgear = result;

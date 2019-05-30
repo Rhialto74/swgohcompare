@@ -3,6 +3,7 @@ import { NgModule } from '@angular/core';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { HttpClientModule, HTTP_INTERCEPTORS } from '@angular/common/http';
 import { RouterModule } from '@angular/router';
+import { LayoutModule } from '@angular/cdk/layout';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { MaterialModule } from './material.module';
 import { AppComponent } from './app.component';
@@ -15,6 +16,7 @@ import { HttpErrorInterceptor } from './providers/http-error.interceptor';
 import { ComparisonModsComponent } from './comparison-mods/comparison-mods.component';
 import { CustomPercentPipe } from './providers/custompercent.pipe';
 import { CreditsComponent } from './credits/credits.component';
+import { ComparisonModsMobileComponent } from './comparison-mods-mobile/comparison-mods-mobile.component';
 
 
 @NgModule({
@@ -27,7 +29,8 @@ import { CreditsComponent } from './credits/credits.component';
     ComparisonStatTableComponent,
     ComparisonModsComponent,
     CustomPercentPipe,
-    CreditsComponent
+    CreditsComponent,
+    ComparisonModsMobileComponent
   ],
   imports: [
     HttpClientModule,
@@ -36,6 +39,7 @@ import { CreditsComponent } from './credits/credits.component';
     ReactiveFormsModule,
     BrowserAnimationsModule,
     MaterialModule,
+    LayoutModule,
     RouterModule.forRoot([
       { path: '', component: HomeComponent, pathMatch: 'full' },
       { path: 'credits', component: CreditsComponent, pathMatch: 'full' }

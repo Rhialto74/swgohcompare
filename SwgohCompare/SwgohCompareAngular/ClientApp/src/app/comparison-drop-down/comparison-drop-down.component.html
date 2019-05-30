@@ -93,11 +93,12 @@
               MODS
             </mat-panel-title>
             <mat-panel-description>
-              
+
             </mat-panel-description>
           </mat-expansion-panel-header>
 
-          <app-comparison-mods [roster]="roster"></app-comparison-mods>
+          <app-comparison-mods [roster]="roster" *ngIf="!loadMobileMods"></app-comparison-mods>
+          <app-comparison-mods-mobile [roster]="roster" *ngIf="loadMobileMods"></app-comparison-mods-mobile>
 
         </mat-expansion-panel>
         
