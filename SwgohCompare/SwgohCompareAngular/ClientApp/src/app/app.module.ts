@@ -1,5 +1,5 @@
 import { BrowserModule } from '@angular/platform-browser';
-import { NgModule } from '@angular/core';
+import { NgModule, ErrorHandler } from '@angular/core';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { HttpClientModule, HTTP_INTERCEPTORS } from '@angular/common/http';
 import { RouterModule } from '@angular/router';
@@ -17,6 +17,8 @@ import { ComparisonModsComponent } from './comparison-mods/comparison-mods.compo
 import { CustomPercentPipe } from './providers/custompercent.pipe';
 import { CreditsComponent } from './credits/credits.component';
 import { ComparisonModsMobileComponent } from './comparison-mods-mobile/comparison-mods-mobile.component';
+import { MonitoringErrorHandler } from './providers/error.handler';
+import { MonitoringService } from './providers/monitoring.service';
 
 
 @NgModule({
@@ -50,6 +52,11 @@ import { ComparisonModsMobileComponent } from './comparison-mods-mobile/comparis
       provide: HTTP_INTERCEPTORS,
       useClass: HttpErrorInterceptor,
       multi: true
+    },
+    MonitoringService,
+    {
+      provide: ErrorHandler,
+      useClass: MonitoringErrorHandler
     }
   ],
   bootstrap: [AppComponent]

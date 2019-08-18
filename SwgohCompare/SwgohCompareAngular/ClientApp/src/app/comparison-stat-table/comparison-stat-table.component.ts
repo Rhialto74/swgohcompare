@@ -57,11 +57,11 @@ export class ComparisonStatTableComponent implements OnInit {
             found.statModValueP2 = item.stats.mods[key]
 
           if (!this.players[1])
-            this.players[1] = item.unit.player;
+            this.players[1] = item.nameKey;
         }
         else {
           if (!this.players[0])
-            this.players[0] = item.unit.player;
+            this.players[0] = item.nameKey;
 
           if (item.stats.mods[key]) {
             this.mapper.push(new mapStatLookup(key, item.stats.final[key], item.stats.mods[key], null, null));

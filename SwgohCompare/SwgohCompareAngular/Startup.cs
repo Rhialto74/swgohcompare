@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.SpaServices.AngularCli;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 using SwgohCompareAngular.Interface;
 using SwgohCompareAngular.Services;
 
@@ -12,9 +13,12 @@ namespace SwgohCompareAngular
 {
     public class Startup
     {
-        public Startup(IConfiguration configuration)
+        private readonly ILogger _logger;
+
+        public Startup(IConfiguration configuration, ILogger<Startup> logger)
         {
             Configuration = configuration;
+            _logger = logger;
         }
 
         public IConfiguration Configuration { get; }
@@ -33,6 +37,7 @@ namespace SwgohCompareAngular
             {
                 configuration.RootPath = "ClientApp/dist";
             });
+            _logger.LogInformation("Adding Angular static files for production");
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -69,6 +74,7 @@ namespace SwgohCompareAngular
 
                 if (env.IsDevelopment())
                 {
+                    _logger.LogInformation("Using development server at localhost:4200");
                     spa.UseProxyToSpaDevelopmentServer("http://localhost:4200");
                     //spa.UseAngularCliServer(npmScript: "start");
                 }

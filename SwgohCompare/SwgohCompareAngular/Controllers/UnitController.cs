@@ -8,6 +8,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
 using SwgohHelpApi;
 using SwgohHelpApi.Model;
@@ -30,13 +31,111 @@ namespace SwgohCompareAngular.Controllers
         private const string sourceCrinolo = "CRINOLO";
         private const string sourceGg = "GG";
 
-        public UnitController(IMemoryCache memoryCache, IConfiguration configuration)
+        private readonly ILogger _logger;
+
+        public UnitController(IMemoryCache memoryCache, IConfiguration configuration, ILogger<UnitController> logger)
         {
             _cache = memoryCache;
             _testUsername = configuration["SwgohHelpAuth:username"];
             _testPassword = configuration["SwgohHelpAuth:password"];
+            _logger = logger;
         }
 
+        #region --- Public Endpoint Methods ---
+        
+
+        /// <summary>
+        /// Returns a list of units common to both ally codes passed in
+        /// </summary>
+        /// <param name="codes"></param>
+        /// <returns></returns>
+        [HttpPost("[action]")]
+        public List<LocalizedUnit> UnitListForPlayers(IEnumerable<string> codes)
+        {
+            try
+            {
+                List<LocalizedUnit> localizedUnits;
+                List<UnitWithStat> PlayerOne;
+                List<UnitWithStat> PlayerTwo;
+
+                var helper = Authenticate();
+
+                localizedUnits = GetLocalizedUnits();
+
+                var codesToRequest = new List<string>(codes);
+
+                var players = Task.Run(() =>
+                {
+                    GetPlayerOneAndTwoFromHelp(codesToRequest);
+                });
+
+                List<List<UnitWithStat>> playerOneandTwo = GetPlayerOneAndTwo(codesToRequest);
+
+                PlayerOne = playerOneandTwo[0];
+                PlayerTwo = playerOneandTwo[1];
+
+                var filteredPlayerUnits = PlayerOne.Where(x => PlayerTwo.Any(y => y.DefId == x.DefId));
+
+                var filteredUnits = localizedUnits.Where(x => filteredPlayerUnits.Any(y => y.DefId == x.BaseId));
+
+                return filteredUnits.ToList();
+            }
+            catch (Exception ex)
+            {
+                _logger.LogCritical(LoggingEvents.UnitListForPlayers, ex, "UnitListForPlayers Exception");
+                return new List<LocalizedUnit>();
+            }
+        }
+
+        [HttpPost("[action]")]
+        public PlayerInformation GetUnitInformationForPlayers(List<string> comparisonInfo)
+        {
+            try
+            {
+                List<UnitWithStat> PlayerOne;
+                List<UnitWithStat> PlayerTwo;
+
+                Player PlayerOneHelp;
+                Player PlayerTwoHelp;
+
+                var helper = Authenticate();
+
+                string unitDefId = comparisonInfo[2];
+                //var helper = Authenticate();
+                var codesToRequest = new List<string>() { comparisonInfo[0], comparisonInfo[1] };
+                var codesToRequest2 = new List<string>() { comparisonInfo[0], comparisonInfo[1] };
+                List<List<UnitWithStat>> playerOneandTwo = GetPlayerOneAndTwo(codesToRequest);
+                List<Player> playerOneandTwoHelp = GetPlayerOneAndTwoFromHelp(codesToRequest2);
+
+                PlayerOne = playerOneandTwo[0];
+                PlayerTwo = playerOneandTwo[1];
+
+                PlayerOneHelp = playerOneandTwoHelp[0];
+                PlayerTwoHelp = playerOneandTwoHelp[1];
+
+                List<UnitWithStat> unitDataToReturn = new List<UnitWithStat>();
+                List<Roster> rosterToReturn = new List<Roster>();
+
+                unitDataToReturn.Add(PlayerOne.Where(x => x.DefId == unitDefId).First());
+                unitDataToReturn.Add(PlayerTwo.Where(x => x.DefId == unitDefId).First());
+
+                rosterToReturn.Add(PlayerOneHelp.Roster.Where(x => x.DefId == unitDefId).First());
+                rosterToReturn.Add(PlayerTwoHelp.Roster.Where(x => x.DefId == unitDefId).First());
+
+                PlayerInformation pinfo = new PlayerInformation() { PlayerNames = new List<string>() { PlayerOneHelp.Name, PlayerTwoHelp.Name }, UnitStatList = unitDataToReturn, RosterList = rosterToReturn, UnitInfo = helper.FetchGearTiersForUnits(unitDefId)[0].unitTierList };
+                return pinfo;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogCritical(LoggingEvents.GetUnitInformationForPlayers, ex, "GetUnitInformationForPlayers Exception");
+                return new PlayerInformation();
+            }
+        }
+
+        #endregion
+        
+        #region --- External API Calls ---
+        
         private List<LocalizedUnit> GetLocalizedUnits()
         {
             List<LocalizedUnit> localizedUnits;
@@ -58,41 +157,6 @@ namespace SwgohCompareAngular.Controllers
                 _cache.Set(LocalUnitEntry, localizedUnits);
             }
             return localizedUnits;
-        }
-
-        /// <summary>
-        /// Returns a list of units common to both ally codes passed in
-        /// </summary>
-        /// <param name="codes"></param>
-        /// <returns></returns>
-        [HttpPost("[action]")]
-        public List<LocalizedUnit> UnitListForPlayers(IEnumerable<string> codes)
-        {
-            List<LocalizedUnit> localizedUnits;
-            UnitDict PlayerOne;
-            UnitDict PlayerTwo;
-
-            var helper = Authenticate();
-
-            localizedUnits = GetLocalizedUnits();
-
-            var codesToRequest = new List<string>(codes);
-
-            var players = Task.Run(() =>
-            {
-                GetPlayerOneAndTwoFromHelp(codesToRequest);
-            });
-            
-            List<UnitDict> playerOneandTwo = GetPlayerOneAndTwo(codesToRequest);
-
-            PlayerOne = playerOneandTwo[0];
-            PlayerTwo = playerOneandTwo[1];
-
-            var filteredPlayerUnits = PlayerOne.Where(x => PlayerTwo.Any(y => y.Key == x.Key));
-
-            var filteredUnits = localizedUnits.Where(x => filteredPlayerUnits.Any(y => y.Key == x.BaseId));
-
-            return filteredUnits.ToList();
         }
 
         private List<Player> GetPlayerOneAndTwoFromHelp(List<string> codesToRequest)
@@ -195,10 +259,10 @@ namespace SwgohCompareAngular.Controllers
             }
             return new List<Player>() { PlayerOne, PlayerTwo };
         }
-        private List<UnitDict> GetPlayerOneAndTwo(List<string> codesToRequest)
+        private List<List<UnitWithStat>> GetPlayerOneAndTwo(List<string> codesToRequest)
         {
-            UnitDict PlayerOne;
-            UnitDict PlayerTwo;
+            List<UnitWithStat> PlayerOne;
+            List<UnitWithStat> PlayerTwo;
             
             string PlayerOneCode = codesToRequest[0];
             string PlayerTwoCode = codesToRequest[1];
@@ -221,57 +285,22 @@ namespace SwgohCompareAngular.Controllers
                 {
                     if (PlayerOne == null)
                     {
-                        PlayerOne = SwgohHelper.fetchDictOfUnitsForPlayerFromCrinolo(code.ToString());
+                        PlayerOne = SwgohHelper.fetchListOfUnitsForPlayerFromCrinolo(code.ToString());
                         SetCacheValue(code, sourceCrinolo, PlayerOne);
                     }
                     else if (PlayerTwo == null)
                     {
-                        PlayerTwo = SwgohHelper.fetchDictOfUnitsForPlayerFromCrinolo(code.ToString());
+                        PlayerTwo = SwgohHelper.fetchListOfUnitsForPlayerFromCrinolo(code.ToString());
                         SetCacheValue(code, sourceCrinolo, PlayerTwo);
                     }
                 }
             }
-            return new List<UnitDict>() { PlayerOne, PlayerTwo };
+            return new List<List<UnitWithStat>>() { PlayerOne, PlayerTwo };
         }
 
-        
+        #endregion
 
-        [HttpPost("[action]")]
-        public PlayerInformation GetUnitInformationForPlayers(List<string> comparisonInfo)
-        {
-            UnitDict PlayerOne;
-            UnitDict PlayerTwo;
-
-            Player PlayerOneHelp;
-            Player PlayerTwoHelp;
-
-            var helper = Authenticate();
-
-            string unitDefId = comparisonInfo[2];
-            //var helper = Authenticate();
-            var codesToRequest = new List<string>() { comparisonInfo[0], comparisonInfo[1] };
-            var codesToRequest2 = new List<string>() { comparisonInfo[0], comparisonInfo[1] };
-            List<UnitDict> playerOneandTwo = GetPlayerOneAndTwo(codesToRequest);
-            List<Player> playerOneandTwoHelp = GetPlayerOneAndTwoFromHelp(codesToRequest2);
-
-            PlayerOne = playerOneandTwo[0];
-            PlayerTwo = playerOneandTwo[1];
-
-            PlayerOneHelp = playerOneandTwoHelp[0];
-            PlayerTwoHelp = playerOneandTwoHelp[1];
-
-            List<UnitData> unitDataToReturn = new List<UnitData>();
-            List<Roster> rosterToReturn = new List<Roster>();
-
-            unitDataToReturn.Add(PlayerOne.Where(x => x.Key == unitDefId).First().Value);
-            unitDataToReturn.Add(PlayerTwo.Where(x => x.Key == unitDefId).First().Value);
-
-            rosterToReturn.Add(PlayerOneHelp.Roster.Where(x => x.DefId == unitDefId).First());
-            rosterToReturn.Add(PlayerTwoHelp.Roster.Where(x => x.DefId == unitDefId).First());
-
-            PlayerInformation pinfo = new PlayerInformation() { PlayerNames = new List<string>() { PlayerOneHelp.Name, PlayerTwoHelp.Name }, UnitStatList = unitDataToReturn, RosterList = rosterToReturn, UnitInfo = helper.FetchGearTiersForUnits(unitDefId)[0].unitTierList };
-            return pinfo;
-        }
+        #region --- Authentication ---
 
         private SwgohHelper Authenticate()
         {
@@ -308,13 +337,10 @@ namespace SwgohCompareAngular.Controllers
             }
         }
 
-        private Dictionary<string, string> GetPlayerEntries(List<string> codes, string source)
-        {
-            var playerEntryList = new Dictionary<string, string>();
-            playerEntryList.Add(string.Concat(codes[0], source), string.Concat(PlayerEntry, source, codes[0]));
-            playerEntryList.Add(string.Concat(codes[0], source), string.Concat(PlayerEntry, source, codes[1]));
-            return playerEntryList;
-        }
+        #endregion
+
+        #region --- Caching ---
+
         private void SetCacheValue<T>(string key, string source, T value)
         {
             // Set cache options.
@@ -324,6 +350,7 @@ namespace SwgohCompareAngular.Controllers
 
             _cache.Set(string.Concat(key, source), value);
         }
+
         private bool GetCacheValue<T>(string item, string source, out T cachedItem)
         {
             string combinedKey = string.Concat(item, source);
@@ -338,6 +365,9 @@ namespace SwgohCompareAngular.Controllers
                 return false;
             }
         }
+
+
+        #endregion
 
     }
 }

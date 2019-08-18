@@ -8,6 +8,7 @@ import { forEach } from '@angular/router/src/utils/collection';
 import { MatStepperModule, MatStepper } from '@angular/material/stepper';
 import { UnitService } from '../providers/unit.service';
 import { BreakpointObserver, Breakpoints } from '@angular/cdk/layout';
+import { MatSnackBar } from '@angular/material/snack-bar';
 
 
 @Component({
@@ -52,7 +53,7 @@ export class ComparisonDropDownComponent implements OnInit {
   storedKeys: Subject<string[]>;
 
   //Main body
-  constructor(private _formBuilder: FormBuilder, unitService: UnitService, breakpointObserver: BreakpointObserver) {
+  constructor(private _formBuilder: FormBuilder, unitService: UnitService, breakpointObserver: BreakpointObserver, private _snackBar: MatSnackBar) {
     this.unitSvc = unitService;
     this.storedKeys = new Subject<string[]>();
     //if (isDevMode()) {
@@ -150,13 +151,19 @@ export class ComparisonDropDownComponent implements OnInit {
 
     //Call the service for the data and populate the fields
     this.unitSvc.GetComparisonTableData(comparisonInfo).subscribe(result => {
-      this.roster = result.rosterList;
-      this.unitData = result.unitStatList;
-      this.roster[0].playerName = result.playerNames[0];
-      this.roster[1].playerName = result.playerNames[1];
-      this.tiers = result.unitInfo;
-      this.populateGear();
-      this.showProgressStepThree = false;
+      //if (result.playerNames == null) {
+      //  this.showProgressStepThree = false;
+      //  let snackBarRef = this._snackBar.open('There is a problem with getting the data at this time. Please contact me via email or on Reddit as MrBleah','Close');
+      //}
+      //else {
+        this.roster = result.rosterList;
+        this.unitData = result.unitStatList;
+        this.roster[0].playerName = result.playerNames[0];
+        this.roster[1].playerName = result.playerNames[1];
+        this.tiers = result.unitInfo;
+        this.populateGear();
+        this.showProgressStepThree = false;
+      //}
     });
   }
   
@@ -188,8 +195,7 @@ export class ComparisonDropDownComponent implements OnInit {
     this.gearitem = this.allgear.find(function (item) {
       return item.base_id == gearid;
     });
-    var lastSlash = this.gearitem.image.lastIndexOf('/') + 1;
-    return "assets/images/" + this.gearitem.image.substring(lastSlash);
+    return "assets/images/" + this.gearitem.base_id + ".png";
   }
 
   //Extracts the image name from the list

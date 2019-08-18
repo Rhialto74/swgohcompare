@@ -1,23 +1,19 @@
 export module RosterModel {
 
   //Begin Crinolo Model Stuff
+  
   export interface UnitData {
-    unit: UnitStat;
-    stats: Stats;
-  }
-
-  export interface UnitStat {
-    updated: number;
-    player: string;
-    allyCode: number;
-    type: number;
-    gp: number;
-    starLevel: number;
+    defId: number;
+    nameKey: string;
+    rarity: number;
     level: number;
-    gearLevel: number;
-    gear: string[];
-    zetas: object[];
+    gear: number;
+    equipped: Equipped[];
+    combatType: number;
+    skill: Skills[];
     mods: UnitMod[];
+    gp: number;
+    stats: Stats;
   }
   export interface Stats {
     final: Final;
@@ -26,11 +22,24 @@ export module RosterModel {
 
   export interface UnitMod {
     id: string;
-    set: number;
     level: number;
-    pips: number;
     tier: number;
-    stat: number[];
+    slot: number;
+    set: number;
+    pips: number;
+    primaryStat: PrimaryStat;
+    secondaryStat: SecondaryStat[];
+  }
+
+  export interface PrimaryStat {
+    unitStat: number;
+    value: number;
+  }
+
+  export interface SecondaryStat {
+    unitStat: number;
+    value: number;
+    roll: number;
   }
 
   export interface StatsMods {
@@ -124,17 +133,7 @@ export interface Crew {
   secondaryStat: SecondaryStat[];
 }
 
-  export interface PrimaryStat {
-  unitStat: string;
-  value: number;
-}
-
-  export interface SecondaryStat {
-  unitStat: string;
-  value: number;
-  roll: number;
-}
-
+  
   export interface Skills {
   id: string;
   tier: number;

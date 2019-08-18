@@ -2,6 +2,7 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 var RosterModel;
 (function (RosterModel) {
+    //Begin Crinolo Model Stuff
     var CharacterGear = /** @class */ (function () {
         function CharacterGear() {
             this.gearSlots = [];

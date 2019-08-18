@@ -91,8 +91,7 @@ export class ComparisonTableComponent implements OnInit {
       this.abilitem = this.allabils.find(function (item) {
         return item.base_id == abilId;
       });
-      var lastSlash = this.abilitem.image.lastIndexOf('/') + 1;
-      return "assets/images/abilities/" + this.abilitem.image.substring(lastSlash);
+      return "assets/images/abilities/" + this.abilitem.base_id + ".png";
     }
     else {
       return "";

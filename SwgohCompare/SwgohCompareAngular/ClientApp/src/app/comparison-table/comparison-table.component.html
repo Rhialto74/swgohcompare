@@ -34,7 +34,6 @@
             <span class="skillName">{{skill.nameKey}}</span><br />
             <span [ngClass]="{'maxedSkill' : skill.tier === 8 }">{{skill.tier === 8 ? "MAXED" : "Level " + skill.tier}} ({{getAbilityType(skill.id)}})</span>
             <mat-divider [inset]="true" *ngIf="!last" class="skillDivider"></mat-divider>
-
           </div>
         </mat-card-content>
       </mat-card>
